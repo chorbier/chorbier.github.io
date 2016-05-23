@@ -1,0 +1,600 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<title>uirs</title>
+</head>
+<body>
+<canvas id="myCanvas" width="720" height="720"></canvas>
+<textarea id="vars" cols="10" rows="20"></textarea>
+<br>
+<button onclick="makeBlock(0)">терминатор</button>
+<button onclick="makeBlock(1)">ввод/вывод</button>
+<button onclick="makeBlock(2)">условие</button>
+<button onclick="makeBlock(3)">опер.</button>
+<button onclick="makeBlock(4)">функ.</button>
+<button onclick="makeBlock(5)">цикл</button>
+<br>
+<textarea id="val" cols="80" rows="5"></textarea>
+<button onclick="SetValue()">set</button>
+<br>
+<textarea id="input" cols="80" rows="5"></textarea>
+<br>
+<textarea id="outp" cols="80" rows="5"></textarea>
+<br>
+<button onclick="NEXT()">next</button>
+<script type="text/javascript" src="CanvasInput.js"></script>
+<script>
+var c=document.getElementById("myCanvas");
+var value=document.getElementById("val");
+var input=document.getElementById("input");
+var output=document.getElementById("outp");
+var varOutput=document.getElementById("vars");
+
+var ctx=c.getContext("2d");
+ctx.translate(0.5,0.5);
+var CurBlock;
+
+function SetValue()
+{
+	if(selected)
+		selected.value=value.value;
+}
+
+var localprint=function()
+{
+	var s="";
+	for(var i in arguments)
+	{
+		s+=arguments[i]+" ";
+	}
+	output.value+=s+"\n";
+}
+
+var localVars={};
+var fors=0;
+
+function leval(vl,fr)
+{
+	if(fr==null)
+		vl=vl.replace(/([^a-z\d\.]|^)([a-z][\da-z]*)(?=[^\(a-z\d\.])/ig,"$1localVars.$2");
+	else
+		vl=vl.replace(/([^a-z\d\.]|^)([a-z][\da-z]*)(?=[^\(a-z\d\.])/ig,"$1localVars.f"+fr+".$2");
+	try
+	{
+		return eval(vl);
+	}
+	catch(err)
+	{
+		localprint("ERROR! "+err.message);
+		return null;
+	}
+}
+
+function base(x,y,sx,sy)
+{
+	this.x=x;
+	this.y=y;
+	this.sx=sx;
+	this.sy=sy;
+}
+function wire(x,y,parent)
+{
+	this.dots=[];
+	this.addDot=function(x,y)
+	{
+		this.dots.push({x:x,y:y});
+	}
+	this.addDot(x,y);
+	this.parent=parent;
+	this.object;
+	this.op1={x:(x-parent.base.x),y:(y-parent.base.y)};
+	this.op2;
+}
+function blockBE(x,y,sx,sy)
+{
+	this.base=new base(x,y,sx,sy)
+	this.value="start";
+	this.draw=function(fs)
+	{
+		ctx.fillStyle=fs || "#FFFFFF";
+		ctx.beginPath();
+		ctx.moveTo(this.base.x+this.base.sx/2,this.base.y+this.base.sy/2)
+		ctx.arc(this.base.x-this.base.sx/2,this.base.y,this.base.sy/2,0.5*Math.PI,1.5*Math.PI,false);
+		ctx.arc(this.base.x+this.base.sx/2,this.base.y,this.base.sy/2,1.5*Math.PI,2.5*Math.PI,false);
+		ctx.fill();
+		ctx.stroke();
+		ctx.fillStyle="#000000";
+		ctx.textAlign="center";
+		ctx.textBaseline="middle"; 
+		ctx.font="12px Arial";
+		ctx.fillText(this.value,this.base.x,this.base.y);
+	}
+	this.execute=function()
+	{
+		if(this.wire[0])
+			CurBlock=this.wire[0].object;
+	}
+
+	this.inputs=[{x:0,y:-0.5}];
+	this.outputs=[{x:0,y:0.5}];
+	this.wire=[];
+	this.inpwire=[];
+}
+function blockIO(x,y,sx,sy)
+{
+	this.base=new base(x,y,sx,sy)
+	this.value="kek";
+	this.draw=function(fs)
+	{
+		ctx.fillStyle=fs || "#FFFFFF";
+		ctx.beginPath();
+		var x=this.base.x,y=this.base.y,sx=this.base.sx/2,sy=this.base.sy/2;
+		ctx.moveTo(x+sx-sy/3,y+sy);
+		ctx.lineTo(x-sx-sy/3,y+sy);
+		ctx.lineTo(x-sx+sy/3,y-sy);
+		ctx.lineTo(x+sx+sy/3,y-sy);
+		ctx.lineTo(x+sx-sy/3,y+sy);
+		ctx.fill();
+		ctx.stroke();
+		ctx.fillStyle="#000000";
+		ctx.textAlign="center";
+		ctx.textBaseline="middle"; 
+		ctx.font="12px Arial";
+		ctx.fillText(this.value,this.base.x,this.base.y);
+	}
+	this.execute=function()
+	{
+		var temp = print;
+		print = localprint;
+		leval(this.value);
+		print=temp;
+		if(this.wire[0])
+			CurBlock=this.wire[0].object;
+	}
+	this.inputs=[{x:0,y:-0.5}];
+	this.outputs=[{x:0,y:0.5}];
+	this.wire=[];
+	this.inpwire=[];
+}
+
+function blockOP(x,y,sx,sy)
+{
+	this.base=new base(x,y,sx,sy)
+	this.value="kek";
+	this.draw=function(fs)
+	{
+		ctx.fillStyle=fs || "#FFFFFF";
+		ctx.beginPath();
+		var x=this.base.x,y=this.base.y,sx=this.base.sx/2,sy=this.base.sy/2;
+		ctx.moveTo(x+sx,y+sy);
+		ctx.lineTo(x-sx,y+sy);
+		ctx.lineTo(x-sx,y-sy);
+		ctx.lineTo(x+sx,y-sy);
+		ctx.lineTo(x+sx,y+sy);
+		ctx.fill();
+		ctx.stroke();
+		ctx.fillStyle="#000000";
+		ctx.textAlign="center";
+		ctx.textBaseline="middle";
+		ctx.font="12px Arial";
+		ctx.fillText(this.value,this.base.x,this.base.y);
+	}
+	this.execute=function()
+	{
+		leval(this.value);
+		if(this.wire[0])
+			CurBlock=this.wire[0].object;
+	}
+	this.inputs=[{x:0,y:-0.5}];
+	this.outputs=[{x:0,y:0.5}];
+	this.wire=[];
+	this.inpwire=[];
+}
+
+function blockIF(x,y,sx,sy)
+{
+	this.base=new base(x,y,sx,sy)
+	this.value="kek";
+	this.draw=function(fs)
+	{
+		ctx.fillStyle=fs || "#FFFFFF";
+		ctx.beginPath();
+		var x=this.base.x,y=this.base.y,sx=this.base.sx/2,sy=this.base.sy/2;
+		ctx.moveTo(x+sx,y);
+		ctx.lineTo(x,y+sy);
+		ctx.lineTo(x-sx,y);
+		ctx.lineTo(x,y-sy);
+		ctx.lineTo(x+sx,y);
+		ctx.fill();
+		ctx.stroke();
+		ctx.fillStyle="#000000";
+		ctx.textAlign="center";
+		ctx.textBaseline="middle"; 
+		ctx.font="12px Arial";
+		ctx.fillText(this.value,this.base.x,this.base.y);
+	}
+	this.execute=function()
+	{
+		var vl=leval(this.value)
+		if(vl!=null)
+		{
+			if(vl && this.wire[1])
+				CurBlock=this.wire[1].object;
+			else if(this.wire[0])
+				CurBlock=this.wire[0].object;
+		}	
+	}
+	this.inputs=[{x:0,y:-0.5}];
+	this.outputs=[{x:-0.5,y:0},{x:0.5,y:0}];
+	this.wire=[];
+	this.inpwire=[];
+}
+
+function blockFN(x,y,sx,sy)
+{
+	this.base=new base(x,y,sx,sy)
+	this.value="kek";
+	this.draw=function(fs)
+	{
+		ctx.fillStyle=fs || "#FFFFFF";
+		var x=this.base.x,y=this.base.y,sx=this.base.sx/2,sy=this.base.sy/2;
+		
+		ctx.fillRect(x-sx-10,y-sy,2*sx+20,2*sy);
+		ctx.strokeRect(x-sx-10,y-sy,2*sx+20,2*sy);
+		ctx.beginPath();
+		ctx.moveTo(x-sx,y-sy);
+		ctx.lineTo(x-sx,y+sy);
+		ctx.stroke();
+		ctx.beginPath();
+		ctx.moveTo(x+sx,y-sy);
+		ctx.lineTo(x+sx,y+sy);
+		ctx.stroke();
+		ctx.fillStyle="#000000";
+		ctx.textAlign="center";
+		ctx.textBaseline="middle"; 
+		ctx.font="12px Arial";
+		ctx.fillText(this.value,this.base.x,this.base.y);
+	}
+	this.execute=function()
+	{
+		var vl=this.value;
+		var MT=Object.getOwnPropertyNames(Math)
+		for(var i in MT)
+		{
+			vl=vl.replace(new RegExp("([^a-z])"+MT[i]+"(?=\\()","ig"),"$1Math."+MT[i]);
+		}
+		leval(vl);
+		if(this.wire[0])
+			CurBlock=this.wire[0].object;
+	}
+	this.inputs=[{x:0,y:-0.5}];
+	this.outputs=[{x:0,y:0.5}];
+	this.wire=[];
+	this.inpwire=[];
+}
+
+function blockFOR(x,y,sx,sy)
+{
+	this.base=new base(x,y,sx,sy)
+	this.value="kek";
+	this.draw=function(fs)
+	{
+		ctx.fillStyle=fs || "#FFFFFF";
+		var x=this.base.x,y=this.base.y,sx=this.base.sx/2,sy=this.base.sy/2;
+		
+		ctx.beginPath();
+		ctx.moveTo(x-sx,y-sy);
+		ctx.lineTo(x+sx,y-sy);
+		ctx.lineTo(x+sx+sy/2,y);
+		ctx.lineTo(x+sx,y+sy);
+		ctx.lineTo(x-sx,y+sy);
+		ctx.lineTo(x-sx-sy/2,y);
+		ctx.lineTo(x-sx,y-sy);
+		ctx.fill();
+		ctx.stroke();
+		ctx.fillStyle="#000000";
+		ctx.textAlign="center";
+		ctx.textBaseline="middle"; 
+		ctx.font="12px Arial";
+		ctx.fillText(this.value,this.base.x,this.base.y);
+	}
+	this.execute=function()
+	{
+		if(this.active)
+			leval(this.parts[2]);
+		else
+		{
+			var rs=this.value.match(/for\((.*);(.*);(.*)\)/i);
+			if(!rs)
+				rs=this.value.match(/(.*);(.*);(.*)/i);
+			if(rs)
+			{
+				this.active=true;
+				this.parts=[rs[1],rs[2],rs[3]];
+				leval(rs[1]);
+			}
+		}
+		var vl=leval(this.parts[1])
+		if(vl!=null)
+		{
+			if(vl && this.wire[0])
+				CurBlock=this.wire[0].object;
+			else if(this.wire[1])
+			{
+				this.active=false;
+				CurBlock=this.wire[1].object;
+			}
+		}
+	}
+	this.active=false;
+	this.parts;
+	this.inputs=[{x:0,y:-0.5},{x:-0.6,y:0}];
+	this.outputs=[{x:0,y:0.5},{x:0.6,y:0}];
+	this.wire=[];
+	this.inpwire=[];
+}
+
+
+function makeBlock(n)
+{
+	var as=[blockBE,blockIO,blockIF,blockOP,blockFN,blockFOR];
+	blocks.push(new as[n](200,200,100,50));
+}
+
+var blocks=[];
+
+var gridSize=20;
+
+function drawGrid(size)
+{
+	var x=size,y=size;
+	ctx.strokeStyle="#DDDDDD";
+	while(x<c.width)
+	{
+		ctx.beginPath();
+		ctx.moveTo(x,0);
+		ctx.lineTo(x,c.height);
+		ctx.stroke();
+		x+=size;
+	}
+	while(y<c.height)
+	{
+		ctx.beginPath();
+		ctx.moveTo(0,y);
+		ctx.lineTo(c.width,y);
+		ctx.stroke();
+		y+=size;
+	}
+}
+
+function NEXT()
+{
+	if(!CurBlock)
+	{
+		for(var i in blocks)
+			if(blocks[i].constructor=blockBE && blocks[i].value=="start")
+			{
+				CurBlock=blocks[i];
+				break;
+			}
+		if(!CurBlock)
+			alert("cant find start block");
+	}
+	else
+	{
+		CurBlock.execute();
+		var s="";
+		for(var i in localVars)
+		{
+			s+=i+"="+localVars[i]+"\n";
+		}
+		varOutput.value=s;
+	}
+}
+
+setInterval(function()
+{
+	ctx.clearRect(0,0,c.width,c.height);
+	drawGrid(gridSize);
+	ctx.strokeStyle="#000000";
+	if(dot)
+	{
+		ctx.beginPath();
+		ctx.arc(dot.x,dot.y,5,0,2*Math.PI);
+		ctx.stroke();
+	}
+	for(var i in blocks)
+	{
+		ctx.strokeStyle="#000000";
+		var b=blocks[i];
+		var col="#ffffff";
+		if(b==howered)
+			col="#ffcccc";
+		else if(b==selected)
+			col="#ccccff";
+		if(b==CurBlock)
+			ctx.strokeStyle="#00ff00";
+		b.draw(col);
+		for(var j in b.wire)
+		{
+			var w=b.wire[j];
+			if(w.object)
+				ctx.strokeStyle="#000000";
+			else
+				ctx.strokeStyle="#ff0000";
+			ctx.beginPath();
+			ctx.moveTo(w.dots[0].x,w.dots[0].y);
+			for(var k=1;k<w.dots.length;k++)
+			{
+				ctx.lineTo(w.dots[k].x,w.dots[k].y);
+			}
+			ctx.stroke();
+		}
+	}
+
+},10);
+
+var state="held";
+var howered;
+var selected; 
+var mox,moy;
+var magnetToGrid=true;
+
+var dot;
+
+var curLink;
+
+c.onmousemove=function(e)
+{
+	var x = e.offsetX;
+	var y = e.offsetY;
+
+	dot=null;
+	if(state=="held")
+	{
+		howered = null;
+		for(var i in blocks)
+		{
+			var b=blocks[i].base;
+			if((b.x-b.sx/2)<x && (b.x+b.sx/2)>x && (b.y-b.sy/2)<y && (b.y+b.sy/2)>y)
+			{
+				howered = blocks[i];
+				break;
+			}
+		}
+		for(var i in blocks)
+		{
+			for(var j in blocks[i].outputs)
+			{
+				var b=blocks[i].outputs[j]
+				var xx=blocks[i].base.x+blocks[i].base.sx*b.x;
+				var yy=blocks[i].base.y+blocks[i].base.sy*b.y;				
+				if(Math.sqrt((xx-x)*(xx-x)+(yy-y)*(yy-y))<10)
+				{
+					dot={parent:blocks[i],x:xx,y:yy,idx:j};
+					break;
+				}
+			}
+			if(dot)
+				break;
+		}
+	}
+	else if(state=="move")
+	{
+		selected.base.x=x+mox;
+		selected.base.y=y+moy;
+		if(magnetToGrid)
+		{
+			selected.base.x=Math.round(selected.base.x/gridSize)*gridSize;
+			selected.base.y=Math.round(selected.base.y/gridSize)*gridSize;			
+		}
+		for(var i in selected.wire)
+		{
+			var w=selected.wire[i];
+			w.dots[0].x=selected.base.x+w.op1.x;
+			w.dots[0].y=selected.base.y+w.op1.y;			
+		}
+		for(var i in selected.inpwire)
+		{
+			var w=selected.inpwire[i];
+			w.dots[w.dots.length-1].x=selected.base.x+w.op2.x;
+			w.dots[w.dots.length-1].y=selected.base.y+w.op2.y;			
+		}
+	}
+	else if(state=="link")
+	{
+		for(var i in blocks)
+		{
+			for(var j in blocks[i].inputs)
+			{
+				var b=blocks[i].inputs[j];
+				var xx=blocks[i].base.x+blocks[i].base.sx*b.x;
+				var yy=blocks[i].base.y+blocks[i].base.sy*b.y;				
+				if(Math.sqrt((xx-x)*(xx-x)+(yy-y)*(yy-y))<10)
+				{
+					dot={parent:blocks[i],x:xx,y:yy};
+					break;
+				}
+			}
+			if(dot)
+				break;
+		}
+		var nx=x;
+		var ny=y;
+		if(magnetToGrid)
+			nx=Math.round(nx/gridSize)*gridSize,ny=Math.round(ny/gridSize)*gridSize;
+		curLink.dots[curLink.dots.length-1]={x:nx,y:ny};
+	}
+}
+
+c.onmousedown=function(e)
+{
+	var x = e.offsetX;
+	var y = e.offsetY;
+
+	if(e.button==0)
+	{
+		if(howered)
+		{
+			selected=howered;
+			value.value=selected.value;
+			state="move";
+			var b=howered.base;
+			mox=b.x-x;
+			moy=b.y-y;
+		}
+	}
+}
+
+c.onclick=function(e)
+{
+	var x = e.offsetX;
+	var y = e.offsetY;
+	if(e.button==0)
+	{
+		if(state=="held")
+		{
+			if(dot)
+			{
+				state="link";
+				curLink=new wire(dot.x,dot.y,dot.parent);
+				dot.parent.wire[dot.idx]=curLink
+//				dot.parent.wire.push(curLink);
+				curLink.addDot(dot.x,dot.y);
+			}
+//			selected=null;
+		}
+		else if(state=="link")
+		{
+			if(dot)
+			{
+				state="held";
+				dot.parent.inpwire.push(curLink);
+				curLink.op2={x:(dot.x-dot.parent.base.x),y:(dot.y-dot.parent.base.y)};
+				curLink.object=dot.parent;
+				curLink.dots[curLink.dots.length-1]={x:dot.x,y:dot.y};
+			}
+			else
+			{
+				curLink.dots.push(curLink.dots[curLink.dots.length-1]);
+			}
+		}
+	}
+}
+
+c.oncontextmenu=function(e)
+{
+	return false;
+}
+
+c.onmouseup=function(e)
+{
+	if(state=="move")
+	{
+		state="held";
+	}
+}
+
+</script>
+</body>
+</html>

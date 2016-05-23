@@ -1,0 +1,121 @@
+<html>
+<head></head>
+<body>
+<canvas id="Canvas" height="720" width="1280">:c</canvas>
+<script>
+var c = document.getElementById("Canvas");
+var ctx = c.getContext("2d");
+var asd=[];
+//var ar="83!12!-42!-1$29!74!0!24$91!159!54!3$136!71!-4!-23$67!6!-46!5#23!112!24!-33$80!45!0!-12$68!94!-2!51$64!180!-2!24$61!270!-1!37#23!84!16!-43$103!61!14!31$74!165!-34!28$26!208!-11!11$125!209!99!56#75!77!30!-38$174!77!15!34$94!156!-16!-20$170!193!-36!44$70!222!-6!-33#63!38!-3!43$55!137!36!-4$134!135!3!-8$141!38!-9!-2$100!297!-36!97#211!57!-49!-8$89!50!-16!-12$97!171!-18!22$205!220!-31!90$94!257!-17!-46#177!45!-78!3$91!160!2!71$169!260!40!-16$211!155!-13!-53$88!194!-6!83#55!88!26!-17$130!95!16!10$191!79!13!-17$152!170!-8!112$141!330!1!9#121!152!-48!-41$121!19!77!-14$71!224!-20!102$152!261!-3!-49$90!133!-53!-53#73!224!35!31$161!78!-12!-75$90!109!-81!-73$117!9!25!6$161!60!0!9";
+var ar="45!13!-34!-1$2!88!0!32$51!194!45!4$88!84!-3!-28$33!5!-42!7#19!65!20!-26$66!11!0!-10$56!51!-1!41$53!121!-2!19$50!194!0!30#4!49!16!-46$76!25!14!33$50!138!-30!30$7!184!-10!12$96!185!89!61#11!33!25!-38$91!33!13!34$27!112!-13!-20$89!149!-30!44$8!178!-6!-33#26!5!-2!31$19!77!29!-4$83!75!3!-5$89!5!-8!-2$56!194!-29!70#96!11!-35!-6$8!6!-12!-10$13!102!-13!18$92!142!-22!72$11!171!-12!-37#70!2!-59!3$3!104!2!63$63!194!31!-15$95!99!-9!-46$3!134!-5!73#-5!19!19!-12$50!24!12!8$94!13!10!-13$65!80!-5!81$57!196!1!6#61!94!-48!-27$61!5!77!-13$11!144!-20!74$92!171!-3!-35$30!83!-53!-38#18!192!28!30$93!67!-9!-66$32!92!-70!-64$58!7!19!4$93!48!0!11";
+var ar=ar.split("#");
+for(var k in ar)
+{
+	ar[k]=ar[k].split("$");
+	for(var i in ar[k])
+	{
+		var AA=ar[k][i].split("!");
+		ar[k][i]={x:parseInt(AA[0]),y:parseInt(AA[1]),ox:parseInt(AA[2]),oy:parseInt(AA[3])};		
+	}
+}
+
+
+
+
+function number(n,x,y,speed)
+{
+	function drawCurve(a)
+	{
+		if(a.length<2)
+			return;
+	//	ctx.strokeStyle="#000000";
+		ctx.beginPath();
+		ctx.moveTo(a[0].x,a[0].y);
+		for(var i=1;i<a.length;i++)
+		{
+			ctx.bezierCurveTo(a[i-1].x+a[i-1].ox,a[i-1].y+a[i-1].oy,a[i].x-a[i].ox,a[i].y-a[i].oy,a[i].x,a[i].y);
+		}
+		ctx.stroke();
+	}
+	this.pos={x:x||0,y:y||0};
+	this.size=1;
+	this.c=n;
+	var speed=speed||1000;
+	var time=(new Date()).getTime();
+	var rar1=ar[n];
+	var rar2=ar[n];
+	this.draw=function()
+	{
+		var rar=[];
+		var kek=((new Date()).getTime()-time)/speed;
+		kek=kek>1?1:kek;
+		for(var i in rar1)
+			rar.push({x:this.pos.x+this.size*(rar1[i].x+(rar2[i].x-rar1[i].x)*kek),y:this.pos.y+this.size*(rar1[i].y+(rar2[i].y-rar1[i].y)*kek),ox:this.size*(rar1[i].ox+(rar2[i].ox-rar1[i].ox)*kek),oy:this.size*(rar1[i].oy+(rar2[i].oy-rar1[i].oy)*kek)});
+		drawCurve(rar);
+	}
+	this.change=function(c)
+	{
+		if(c==this.c)
+			return;
+		this.c=c;
+		time=(new Date()).getTime();
+		rar1=rar2;
+		rar2=ar[c];
+	}
+}
+var size=1;
+var d=new Date();
+var clock=[];
+clock.push(new number(Math.floor(d.getHours()/10),0,10,10000));
+clock.push(new number(d.getHours()%10,100*size,10,10000));
+clock.push(new number(Math.floor(d.getMinutes()/10),300*size,10,5000));
+clock.push(new number(d.getMinutes()%10,400*size,10,5000));
+clock.push(new number(Math.floor(d.getSeconds()/10),600*size,10,900));
+clock.push(new number(d.getSeconds()%10,700*size,10,900));
+
+setInterval(function(){
+	var d=new Date();
+	clock[0].change(Math.floor(d.getHours()/10));
+	clock[1].change(d.getHours()%10);
+	clock[2].change(Math.floor(d.getMinutes()/10));
+	clock[3].change(d.getMinutes()%10);
+	clock[4].change(Math.floor(d.getSeconds()/10));
+	clock[5].change(d.getSeconds()%10);
+},1000)
+
+setInterval(function()
+{
+	ctx.fillStyle="#ffffff";
+	ctx.fillRect(0,0,c.width,c.height);
+	for(var i in clock)
+		clock[i].draw();
+},10)
+function mov(a,x,y)
+{
+	for(var i in ar[a])
+	{
+		ar[a][i].x=ar[a][i].x+x;
+		ar[a][i].y=ar[a][i].y+y;
+	}
+}
+function mul(a,x,y)
+{
+	for(var i in ar[a])
+	{
+		var sx=ar[a][i].ox+ar[a][i].x;
+		var sy=ar[a][i].oy+ar[a][i].y;
+		ar[a][i].x=Math.floor(ar[a][i].x*x);
+		ar[a][i].y=Math.floor(ar[a][i].y*y);
+		ar[a][i].ox=Math.floor(sx*x-ar[a][i].x);
+		ar[a][i].oy=Math.floor(sy*y-ar[a][i].y);
+	}
+}
+ctx.lineWidth = 3;
+ctx.shadowBlur=0;
+ctx.shadowOffsetX=2;
+ctx.shadowOffsetY=2;
+ctx.shadowColor="#ff0000";
+//var ar="83!12!-42!-1$29!74!0!24$91!159!54!3$136!71!-4!-23$67!6!-46!5#23!112!24!-33$80!45!0!-12$68!94!-2!51$64!180!-2!24$61!270!-1!37#23!84!16!-43$103!61!14!31$74!165!-34!28$26!208!-11!11$125!209!99!56#75!77!30!-38$174!77!15!34$94!156!-16!-20$170!193!-36!44$70!222!-6!-33#63!38!-3!43$55!137!36!-4$134!135!3!-8$141!38!-9!-2$100!297!-36!97#211!57!-49!-8$89!50!-16!-12$97!171!-18!22$205!220!-31!90$94!257!-17!-46#177!45!-78!3$91!160!2!71$169!260!40!-16$211!155!-13!-53$88!194!-6!83#55!88!26!-17$130!95!16!10$191!79!13!-17$152!170!-8!112$141!330!1!9#121!152!-48!-41$121!19!77!-14$71!224!-20!102$152!261!-3!-49$90!133!-53!-53#73!224!35!31$161!78!-12!-75$90!109!-81!-73$117!9!25!6$161!60!0!9";
+</script>
+</body>
+</html>
