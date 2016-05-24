@@ -4,11 +4,14 @@
 </head>
 <body>
 <style>
-	* { margin:0; padding:0; }
-	canvas { display:block; } 
+	* { margin:0; padding:0;}
+	body {background-color:#111322} 
 
 </style>
-<canvas id="Canvas"  height="1200" width="1800" style="position: fixed">:c</canvas>
+<div id="posos" height="100%" width="100%" style="">
+	<canvas id="Canvas" height="100%" width="100%" style="position: fixed; display:block; z-index: 0;">:c</canvas>
+	<canvas id="Canvas2" height="100%" width="100%" style="position: fixed; display:block; z-index: 1;"></canvas>
+</div>
 <script>
 var c = document.getElementById("Canvas");
 var ctx = c.getContext("2d");
@@ -24,23 +27,19 @@ function add(xx,yy)
 	dy.push((Math.random()-0.5)/2);
 	d.push(Math.random()*3+0.1);
 }
+var len=200;
 
+var par={x:0,y:0,n:{x:0,y:0}};
 function draw()
 {
-	var len=200;
 	var l=x.length;
-	ctx.fillStyle="#444466";
-	ctx.fillRect(0,0,c.width,c.height);
+	ctx.clearRect(0,0,c.width,c.height);
+//	ctx.fillStyle="#444466";
+//	ctx.fillRect(0,0,c.width,c.height);
+	ctx.translate(par.x,par.y);
 	ctx.fillStyle="#9999bb";
 	for(var i=1;i<l;i++)
 	{
-		/*if(x[i]<-len || x[i]>(c.width+len) || y[i]<-len || y[i]>(c.height+len))
-		{
-			x[i]=Math.random()*c.width;
-			y[i]=Math.random()*c.height;
-			dx[i]=(Math.random()-0.5)/2;
-			dy[i]=(Math.random()-0.5)/2;
-		}*/
 		if(x[i]<-len)
 			x[i]=c.width+len;
 		else if(x[i]>(c.width+len))
@@ -73,34 +72,57 @@ function draw()
 			}
 		}
 	}
+	ctx.translate(-par.x,-par.y);
 }
 function resize()
 {
+	var ss=document.getElementById("Canvas2");
 	c.width=window.innerWidth;
 	c.height=window.innerHeight;
+	ss.width=window.innerWidth;
+	ss.height=window.innerHeight;
 }
-resize()
-window.addEventListener('resize',resize,false)
+resize();
+window.addEventListener('resize',resize,false);
 
-for(var i=0;i<80;i++)
+for(var i=0;i<100;i++)
 {
-	add(Math.random()*c.width,Math.random()*c.height);
+	add(Math.random()*(c.width+2*len)-len,Math.random()*(c.height+2*len)-len);
 }
 
-c.onmousemove=function(e)
+window.onmousemove=function(e)
 {
 	x[0] = e.offsetX;
 	y[0] = e.offsetY;
-}
 
+	par.n.x=(x[0]-c.width/2)/30;
+	par.n.y=(y[0]-c.height/2)/30;
+
+	par.x+=(par.n.x-par.x)*0.01;
+	par.y+=(par.n.y-par.y)*0.01;
+
+	x[0]-=par.x;
+	y[0]-=par.y;
+}
+/*
 c.onclick=function(e)
 {
 	var cnt=4+(Math.random()>0.5);
 	for(var i=1;i<cnt;i++)
 		add(x[0],y[0]);
-}
+}*/
 
-setInterval(draw,10);
+setInterval(draw,20);
 </script>
+<script>
+var c2 = document.getElementById("Canvas2");
+var ctx2=c2.getContext("2d");
+
+var sos=document.getElementsByClassName("sos");
+
+for(var i=0;)
+
+</script>
+<div class="sos" id="keks"></div>
 </body>
 </html>
