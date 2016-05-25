@@ -118,15 +118,26 @@ function game()
 		this.base.ang=a;
 		this.base.type="bullet";
 	}
+
+	this.bullets;
+	var startTime;
+	this.particles;
+
+	this.NEWGAME=function()
+	{
+		this.bullets=[];
+		startTime=Date.now();
+		
+		this.objects=[
+			new this.ship(250,250,50)
+		];
+		
+		this.particles=[];
+
+		this.points=0;
+	}
 	
-	this.bullets=[];
-	var startTime=Date.now();
-	
-	this.objects=[
-		new this.ship(250,250,50)
-	];
-	
-	this.particles=[];
+	this.NEWGAME();
 	
 	this.shoot = function()
 	{
@@ -141,7 +152,9 @@ function game()
 		this.objects.push(ast);
 		return ast;
 	}
-		
+	
+
+
 	this.checkCollisions = function()
 	{
 		for(var i=0;i<this.objects.length;++i)
@@ -166,6 +179,11 @@ function game()
 					if(!i)
 					{
 						this.objects[0].base.hp-=10;
+						if(this.objects[0].base.hp<=0)
+						{
+							this.menu.active=true;
+							this.menu.buttons.continue.active=false;
+						}
 					}
 					var vx=(o2.x-o1.x)/dist;
 					var vy=(o2.y-o1.y)/dist;				
@@ -234,22 +252,103 @@ function game()
 			}
 		}
 	}
+
+	function button(x,y,text,size,active,callbck)
+    {
+        this.x=x;
+        this.y=y;
+        this.text=text;
+        this.size=0;
+        this.colour="#aaaaff";
+        this.howered=false;
+        this.nsize=size;
+        this.measure={width:0,height:0};
+        this.active=active;
+        this.howeron=function()
+        {
+            if(this.howered)
+                return;
+            this.howered=true;
+            this.colour="#0000ff";
+            this.nsize+=10;
+
+        }
+        this.howeroff=function()
+        {
+            if(this.howered)
+            {
+                this.howered=false;
+                this.nsize-=10;
+                this.colour="#aaaaff";
+            }
+        }
+        this.draw=function(ctx)
+        {
+
+            this.size+=(this.nsize-this.size)*0.1;
+            ctx.textBaseline="middle"; 
+            ctx.textAlign="center";
+            ctx.font=(Math.round(this.size*10)/10)+"px Georgia";
+            ctx.fillStyle=this.active?this.colour:"#555555";
+            ctx.lineWidth = 4;
+            ctx.strokeStyle="black";
+            ctx.strokeText(this.text,this.x,this.y);
+            ctx.fillText(this.text,this.x,this.y);
+            this.measure=ctx.measureText(this.text);
+        }
+        this.onclick=callbck;
+    }
+
+    this.menu={active:true,buttons:{}};
 	
+    this.menu.buttons.continue=new button(c.width/2,200,"CONTINUE",50,false,function(gm){
+        gm.menu.active=false;
+    });
+
+    this.menu.buttons.newgame=new button(c.width/2,400,"NEW GAME",60,true,function(gm){
+        gm.menu.active=false;
+        gm.menu.buttons.continue.active=true;
+        gm.NEWGAME();
+    });
+
 	var del=Date.now()
 	this.shootDelay=100;
+    var some=true;
+    var imgDat;
 	this.think=function()
 	{
-		/*
-		if(this.objects[0].base.hp<=0)
-		{
-			ctx.font="150px Verdana";
-			ctx.textBaseline="middle";
-			ctx.textAlign="center"; 
-			ctx.fillStyle="#FF0000";
-			ctx.fillText("GAMEOVER",c.width/2,c.height/2);
-			return;
-		}/**/
-		var prog=(Date.now()-startTime)*0.2;//0.0000000000005;
+        if (keyState[27]) {
+            this.menu.active=true;
+        }
+        if(this.menu.active)
+        {
+            if(some)
+            {
+                some=false;
+                ctx.fillStyle="#9999ff";
+                ctx.globalAlpha=0.2;
+                ctx.fillRect(0,0,c.width,c.height);
+                ctx.globalAlpha=1;
+                imgDat=ctx.getImageData(0,0,c.width,c.height);
+            }
+            ctx.putImageData(imgDat,0,0);
+            for(var i in this.menu.buttons)
+            {
+                var bt=this.menu.buttons[i];
+                bt.draw(ctx);
+            }
+            if(this.points>0)
+            {
+                var str="Score: "+this.points;
+                ctx.fillStyle="#ffff00";
+                ctx.font="80px Georgia";
+                ctx.lineWidth=10;
+                ctx.strokeText(str,c.width/2,500);
+                ctx.fillText(str,c.width/2,500);
+            }
+            return;
+        }
+   		var prog=(Date.now()-startTime)*0.2;//0.0000000000005;
 		startTime = Date.now();
 		if(keyState[keys.left])
 			this.objects[0].base.ang+=0.03*prog;
@@ -306,6 +405,7 @@ function game()
 		
 		ctx.fillStyle="#ff0000";
 		ctx.strokeStyle="#ff0000";
+        ctx.lineWidth = 1;
 		
 		ctx.strokeRect(5,c.height-30,204,24);
 		ctx.fillRect(7,c.height-28,this.objects[0].base.hp*2,20);
@@ -329,11 +429,17 @@ function game()
 			ast.base.vel.a=randint(-20,20)/200;
 		}
 
-		ctx.textBaseline="hanging"; 
-		ctx.font="20px Georgia";
-		ctx.fillStyle="#00ffff";
-		ctx.fillText("Points: "+this.points,10,10);
+        ctx.textBaseline="hanging";
+        ctx.textAlign="start"; 
+        ctx.font="30px Georgia";
+        ctx.fillStyle="#11ffff";
+        ctx.lineWidth = 10;
+        var str="Points: "+this.points;
+        ctx.strokeStyle="black";
+        ctx.strokeText(str,10,10);
+        ctx.fillText(str,10,10);
 	}
+
 }
 
 Gm=new game();
@@ -394,6 +500,35 @@ function OnLoad()
 		e.preventDefault();
 		keyState[e.keyCode]=false;
 	}
+	    c.onclick=function(e)
+    {
+        var x=e.offsetX;
+        var y=e.offsetY;
+        if(Gm.menu.active && activeButton && activeButton.active)
+        {
+            activeButton.onclick(Gm);
+        }
+    }
+
+    var activeButton=null;
+    c.onmousemove=function(e)
+    {
+        var x=e.offsetX;
+        var y=e.offsetY;
+        for(var i in Gm.menu.buttons)
+        {
+            var bt=Gm.menu.buttons[i];
+            if(y<(bt.y+bt.size/2) && y>(bt.y-bt.size/2))
+            {
+                bt.howeron();
+                activeButton=bt;
+            }
+            else
+            {
+                bt.howeroff();
+            }
+        }
+    }
 }
 </script>
 </body>
