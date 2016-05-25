@@ -1,0 +1,400 @@
+<html>
+<head></head>
+
+<body>
+<canvas id="Canvas" height="720" width="1280" style="border: 1px solid black">:c</canvas>
+
+<script>
+function loadImages(sources, callback)
+{
+	var images = {};
+	var loadedImages = 0;
+	var numImages = 0;
+	// get num of sources
+	for(var src in sources)
+	{
+		numImages++;
+	}
+	for(var src in sources)
+	{
+		images[src] = new Image();
+		images[src].onload = function()
+		{
+			if(++loadedImages >= numImages)
+			{
+				callback(images);
+			}
+		};
+		images[src].src = sources[src];
+	}
+}
+
+function randint(min,max)
+{
+	if(max==null)
+	{
+		max=min;
+		min=0;
+	}
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+var c = document.getElementById("Canvas");
+var ctx = c.getContext("2d");
+var names = ["webgl", "experimental-webgl", "webkit-3d", "moz-webgl"];
+    gl = null;
+    for (var ii = 0; ii < names.length; ++ii) {
+        try {
+            gl = c.getContext(names[ii]);
+        } catch(e ) {}
+        if ( gl) {
+            break;
+        }
+    }
+var base=function(x,y,r)
+{
+	this.x=x;
+	this.y=y;
+	this.vel={x:0,y:0,a:0};
+	this.r=r;
+	this.ang=0;
+	this.type="";
+	this.hp=100;
+	this.draw=function()
+	{
+		ctx.save();
+		ctx.translate(this.x,this.y);
+		ctx.rotate(-this.ang);
+		ctx.drawImage(images[this.type],-this.r,-this.r,this.r*2,this.r*2);
+		ctx.restore();
+	}
+	this.think=function()
+	{
+		this.x=this.x+this.vel.x;
+		this.y=this.y+this.vel.y;
+		this.ang=this.ang+this.vel.a;
+	}	
+}
+
+function part(x,y,velx,vely,life)
+{
+	this.x=x;
+	this.y=y;
+	var vx=velx;
+	var vy=vely;
+	this.life=life;
+	
+	this.draw=function()
+	{
+		this.x+=vx;
+		this.y+=vy;
+		vx*=0.99;
+		vy*=0.99;
+		ctx.fillRect(this.x,this.y,this.life/100,this.life/100);
+		return this.life--;
+	}
+}
+
+
+function game()
+{
+	this.ship=function(x,y,r)
+	{
+		this.base=new base(x,y,r);
+		this.base.type="ship";
+	}
+	
+	this.asteroid=function(x,y,r)
+	{
+		this.base=new base(x,y,r);
+		this.base.type="asteroid";
+	}
+	
+	this.bullet = function(x,y,r,vx,vy,a)
+	{
+		this.base=new base(x,y,r)
+		this.base.vel.x=vx;
+		this.base.vel.y=vy;
+		this.base.ang=a;
+		this.base.type="bullet";
+	}
+	
+	this.bullets=[];
+	var startTime=Date.now();
+	
+	this.objects=[
+		new this.ship(250,250,50)
+	];
+	
+	this.particles=[];
+	
+	this.shoot = function()
+	{
+		var ship=this.objects[0].base;
+		var speed=10;
+		this.bullets.push(new this.bullet(ship.x,ship.y,5,-speed*Math.sin(ship.ang)+ship.vel.x,-speed*Math.cos(ship.ang)+ship.vel.y,ship.ang));
+	}
+	
+	this.makeAst = function(x,y,r)
+	{
+		var ast=new this.asteroid(x,y,r)
+		this.objects.push(ast);
+		return ast;
+	}
+		
+	this.checkCollisions = function()
+	{
+		for(var i=0;i<this.objects.length;++i)
+		{
+			var ob=this.objects[i].base;
+			if(ob.x>c.width+ob.r)
+				ob.x=-ob.r;
+			if(ob.y>c.height+ob.r)
+				ob.y=-ob.r;
+			if(ob.x<-ob.r)
+				ob.x=c.width+ob.r;
+			if(ob.y<-ob.r)
+				ob.y=c.height+ob.r;
+			for(var j=i+1;j<this.objects.length;++j)
+			{
+				var o1=this.objects[i].base,o2=this.objects[j].base;			
+				var dist=Math.sqrt((o2.x-o1.x)*(o2.x-o1.x)+(o2.y-o1.y)*(o2.y-o1.y));
+				if(!dist)
+					dist=0.001;
+				if(dist<(o2.r+o1.r))
+				{
+					if(!i)
+					{
+						this.objects[0].base.hp-=10;
+					}
+					var vx=(o2.x-o1.x)/dist;
+					var vy=(o2.y-o1.y)/dist;				
+					var p1x=vx*(vx*o1.vel.x+vy*o1.vel.y);
+					var p1y=vy*(vx*o1.vel.x+vy*o1.vel.y);
+					var p2x=vx*(vx*o2.vel.x+vy*o2.vel.y);
+					var p2y=vy*(vx*o2.vel.x+vy*o2.vel.y);
+					o1.vel.x+=p2x-p1x;
+					o1.x+=vx*(dist-(o2.r+o1.r))*0.5;
+					o1.vel.y+=p2y-p1y;
+					o1.y+=vx*(dist-(o2.r+o1.r))*0.5;
+					o2.vel.x+=p1x-p2x;
+					o2.x-=vy*(dist-(o2.r+o1.r))*0.5;
+					o2.vel.y+=p1y-p2y;
+					o2.y-=vy*(dist-(o2.r+o1.r))*0.5;
+				}
+			}
+		}
+	}
+	this.points=0;
+	this.checkHit = function()
+	{
+		for(var i=this.bullets.length-1;i>=0;i--)
+		{
+			var xx=this.bullets[i].base.x;
+			var yy=this.bullets[i].base.y;
+			for(var j=1;j<this.objects.length;++j)
+			{
+				if(!this.bullets[i])
+					return;
+				var o1=this.bullets[i].base,o2=this.objects[j].base;			
+				var dist=Math.sqrt((o2.x-o1.x)*(o2.x-o1.x)+(o2.y-o1.y)*(o2.y-o1.y));
+				if(dist<o2.r)
+				{
+					for(var k=0;k<70;k++)
+					{
+						var ang=2*Math.PI*Math.random();
+						var vel=Math.random()*2;
+						this.particles.push(new part(o1.x,o1.y,Math.cos(ang)*vel+o1.vel.x/3,Math.sin(ang)*vel+o1.vel.y/3,randint(150,250)));
+					}
+					this.bullets.splice(i,1);
+					o2.hp-=30;
+					if(o2.hp<=0 && o2.r>50)
+					{
+						this.points+=5;
+						o2.r*=0.7;
+						var ox=Math.random(),oy=Math.random();
+						var ast=this.makeAst(o2.x+ox,o2.y+ox,o2.r);
+						ast.base.vel.x=o2.vel.x+ox;
+						ast.base.vel.y=o2.vel.y+oy;
+						o2.vel.x-=ox;
+						o2.vel.y-=oy;
+						ast.base.vel.a=randint(-20,20)/200;
+						o2.hp=100;
+					}
+					else if(o2.hp<=0)
+					{
+						this.points+=10;
+						this.objects.splice(j,1);
+					}
+				}
+			}
+			if(xx>c.width || xx<0 || yy>c.height || yy<0)
+			{
+				this.bullets.splice(i,1);
+			}
+		}
+	}
+	
+	var del=Date.now()
+	this.shootDelay=100;
+	this.think=function()
+	{
+		/*
+		if(this.objects[0].base.hp<=0)
+		{
+			ctx.font="150px Verdana";
+			ctx.textBaseline="middle";
+			ctx.textAlign="center"; 
+			ctx.fillStyle="#FF0000";
+			ctx.fillText("GAMEOVER",c.width/2,c.height/2);
+			return;
+		}/**/
+		var prog=(Date.now()-startTime)*0.2;//0.0000000000005;
+		startTime = Date.now();
+		if(keyState[keys.left])
+			this.objects[0].base.ang+=0.03*prog;
+		if(keyState[keys.right])
+			this.objects[0].base.ang-=0.03*prog;
+		if(keyState[keys.up])
+		{
+			this.objects[0].base.vel.x-=Math.sin(this.objects[0].base.ang)/10*prog;
+			this.objects[0].base.vel.y-=Math.cos(this.objects[0].base.ang)/10*prog;
+		}
+		if(keyState[keys.down])
+		{
+			this.objects[0].base.vel.x+=Math.sin(this.objects[0].base.ang)/10*prog;
+			this.objects[0].base.vel.y+=Math.cos(this.objects[0].base.ang)/10*prog;
+		}
+		else if(!keyState[keys.down] && !keyState[keys.up])
+		{
+			this.objects[0].base.vel.x*=(1-0.005*prog);
+			this.objects[0].base.vel.y*=(1-0.005*prog);
+		}
+		
+		if(keyState[keys.space] && (Date.now()-del)>this.shootDelay)
+		{
+			del=Date.now();
+			this.shoot();
+		}
+		
+		this.checkCollisions();
+		this.checkHit();
+		ctx.fillStyle="#ffffff";
+//		ctx.fillRect(0,0,c.width,c.height);
+//		var ssx=this.objects[0].base.x/2;
+//		var ssy=this.objects[0].base.y/2;		
+//		ctx.drawImage(images.background,-ssx-50,-ssy-50,c.width*1.5+100,c.height*1.5+100);
+		ctx.drawImage(images.background,0,0,c.width,c.height);
+		for(var i =0;i<this.objects.length;i++)
+		{
+			this.objects[i].base.think();
+			this.objects[i].base.draw();
+		}
+		for(var i in this.bullets)
+		{
+			this.bullets[i].base.think();
+			this.bullets[i].base.draw();
+		}
+		ctx.fillStyle="#FFFFAA";
+		for(var i in this.particles)
+		{
+			if(!this.particles[i].draw())
+			{
+				this.particles.splice(i,1);
+			}
+		}
+		
+		ctx.fillStyle="#ff0000";
+		ctx.strokeStyle="#ff0000";
+		
+		ctx.strokeRect(5,c.height-30,204,24);
+		ctx.fillRect(7,c.height-28,this.objects[0].base.hp*2,20);
+		//==================================================================================
+		if(this.objects.length<5)
+		{
+			var r=randint(20,100)
+			if(randint(1))
+			{
+				var x=randint(c.width);
+				var y=randint(1)?(-r):(c.height+r);
+			}
+			else
+			{
+				var y=randint(c.height);
+				var x=randint(1)?(-r):(c.width+r);				
+			}
+			var ast=this.makeAst(x,y,r);
+			ast.base.vel.x=(randint(1)?randint(5,10):randint(-10,-5))/3;
+			ast.base.vel.y=(randint(1)?randint(5,10):randint(-10,-5))/3;
+			ast.base.vel.a=randint(-20,20)/200;
+		}
+
+		ctx.textBaseline="hanging"; 
+		ctx.font="20px Georgia";
+		ctx.fillStyle="#00ffff";
+		ctx.fillText("Points: "+this.points,10,10);
+	}
+}
+
+Gm=new game();
+
+var images={};
+var keyState=[];
+var keys={
+	left:37,
+	right:39,
+	up:38,
+	down:40,
+	space:32
+};
+loadImages({
+ship: 'http://opengameart.org/sites/default/files/ship3.png',
+//ship: "C:\\Users\\Student\\Desktop\\BANANANANA.png",
+//ship: "C:\\Users\\Student\\Desktop\\sdfghdsfh.png",
+asteroid: 'http://vignette4.wikia.nocookie.net/elderscrolls/images/a/af/Hearth_stone.png/revision/latest?cb=20141218191146',
+//asteroid: "C:\\Users\\Student\\Desktop\\Vuhuhol.png",
+background: 'http://luxfon.com/images/201304/luxfon.com_20765.jpg',
+bullet: 'http://vignette4.wikia.nocookie.net/terraria/images/0/0c/%D0%97%D0%BE%D0%BB%D0%BE%D1%82%D0%B0%D1%8F_%D0%BF%D1%83%D0%BB%D1%8F.png/revision/latest?cb=20131006044837&path-prefix=ru'
+//background: 'http://entropymag.org/wp-content/uploads/2014/10/outer-space-wallpaper-pictures.jpg'
+},function(asd){images=asd; OnLoad()});
+function OnLoad()
+{
+	(function() {
+		var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+		window.requestAnimationFrame = requestAnimationFrame;
+	})();
+	if(window.requestAnimationFrame)
+	{
+		var start = Date.now();
+		function step(timestamp)
+		{
+			var progress = timestamp - start;
+			Gm.think();
+			if (progress < 2000)
+			{
+				requestAnimationFrame(step);
+			}
+		}
+		requestAnimationFrame(step);
+	}
+	else
+	{
+		setInterval(function()
+		{
+			Gm.think();
+		},10);
+	}
+	document.body.onkeydown=function(e)
+	{
+		e.preventDefault();
+		keyState[e.keyCode]=true;
+	}
+	document.body.onkeyup=function(e)
+	{
+		e.preventDefault();
+		keyState[e.keyCode]=false;
+	}
+}
+</script>
+</body>
+</html>
