@@ -18,6 +18,8 @@ var l=document.getElementById;
 
 var x=[],y=[],dx=[0],dy=[0],d=[0];
 
+var kek=1;
+
 function add(xx,yy)
 {
 	x.push(xx);
@@ -52,8 +54,8 @@ function draw()
 	}
 	for(var i=0;i<l;i++)
 	{
-		x[i]+=dx[i];
-		y[i]+=dy[i];
+		x[i]+=dx[i]*kek;
+		y[i]+=dy[i]*kek;
 		ctx.globalAlpha=1;
 		ctx.beginPath();
 		ctx.arc(x[i],y[i],d[i],0,2*Math.PI);
@@ -120,10 +122,8 @@ window.onclick=function(e)
 
 setInterval(function(){draw(); draw2();},20);
 </script>
-<script>
-var c2 = document.getElementById("Canvas2");
-var ctx2=c2.getContext("2d");
 
+<script>
 var sos=document.getElementsByClassName("sos");
 
 
@@ -131,6 +131,7 @@ var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 var analyser = audioCtx.createAnalyser();
 
 var stream=document.getElementById("dolbit");
+stream.volume = 0.1;
 
 stream.crossOrigin = "anonymous";
 
@@ -138,30 +139,46 @@ source = audioCtx.createMediaElementSource(stream);
 source.connect(analyser);
 analyser.connect(audioCtx.destination);
 
-analyser.fftSize = 2048;
+analyser.fftSize = 512;
 var bufferLength = analyser.frequencyBinCount;
+console.log(bufferLength);
 var dataArray = new Uint8Array(bufferLength);
+
+var asd=0;
 
 var draw2 = function ()
 {
-	var c = document.getElementById("Canvas2");
+	var c = document.getElementById("Canvas");
 	var ctx = c.getContext("2d");
 
-	analyser.getByteTimeDomainData(dataArray);
+	analyser.getByteFrequencyData(dataArray);
 
-	ctx.clearRect(0,0,c.width,c.height);
-
-	ctx.beginPath()
-	ctx.strokeStyle="#ffffff";
-	ctx.moveTo(0,c.height/2);
-
+	nv=0;
 	for(var i=0;i<bufferLength; i++)
 	{
-		ctx.lineTo(i/bufferLength*c.width,((dataArray[i]/128.0-1)*1+1)*(c.height/2));
+		nv+=(dataArray[i])*(dataArray[i]);
 	}
-	ctx.stroke();
+	nv=Math.sqrt(nv);
+
+	var ses=clamp(nv-kv,0,Infinity);
+
+	asd=(asd+ses*0.8)%360;
+
+//	document.body.style.backgroundColor = "hsl("+Math.round(asd)+",100%, "+clamp(Math.round(ses/5+5),10,100) +"%)";
+	document.body.style.backgroundColor = "hsl("+Math.round(240+ses/2)+",100%, "+clamp(Math.round(ses/5+5),10,100) +"%)";
+
+	kv=nv;
+
+	kek=clamp(ses/2,0,50)+1;
 
 }
+
+function clamp(a,b,c)
+{
+	return (a<b)?b:((a>c)?c:a);
+}
+
+var kv=0;
 
 /*
 var SoundCloudAudioSource = function(audioElement) {
