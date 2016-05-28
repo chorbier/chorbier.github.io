@@ -9,7 +9,7 @@
 
 </style>
 <div id="posos" height="100%" width="100%" style="">
-	<canvas id="Canvas" height="100%" width="100%" style="position: fixed; display:block; z-index: 0;">:c</canvas>
+	<canvas id="Canvas" height="100%" width="100%" style="position: fixed; display:block; z-index: 0; ">:c</canvas>
 	<canvas id="Canvas2" height="100%" width="100%" style="position: fixed; display:block; z-index: 1;"></canvas>
 </div>
 <script>
@@ -120,7 +120,18 @@ var ctx2=c2.getContext("2d");
 
 var sos=document.getElementsByClassName("sos");
 
-for(var i=0;)
+
+			var kal=[];
+			var vol=3;
+			for(var i=0;i<vol;i++)
+			{
+				kal[i] = new Audio("http://streamcluster02.true.nl:8000/qdance-hard")
+			}
+			setTimeout(function()
+			{
+				for(var i=0;i<vol;i++)
+					kal[i].play();
+			},2000)
 
 </script>
 <div class="sos" id="keks"></div>

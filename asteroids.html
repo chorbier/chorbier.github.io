@@ -1,8 +1,8 @@
 <html>
 <head></head>
-
+<style>*{margin:0; padding:0;}</style>
 <body>
-<canvas id="Canvas" height="720" width="1280" style="border: 1px solid black">:c</canvas>
+<canvas id="Canvas" height="720" width="1280" style="position: fixed; display:block;">:c</canvas>
 
 <script>
 function loadImages(sources, callback)
@@ -322,16 +322,8 @@ function game()
         }
         if(this.menu.active)
         {
-            if(some)
-            {
-                some=false;
-                ctx.fillStyle="#9999ff";
-                ctx.globalAlpha=0.2;
-                ctx.fillRect(0,0,c.width,c.height);
-                ctx.globalAlpha=1;
-                imgDat=ctx.getImageData(0,0,c.width,c.height);
-            }
-            ctx.putImageData(imgDat,0,0);
+            ctx.drawImage(images.background,0,0,c.width,c.height);
+            
             for(var i in this.menu.buttons)
             {
                 var bt=this.menu.buttons[i];
@@ -531,6 +523,15 @@ function OnLoad()
         }
     }
 }
+
+function resize()
+{
+	c.width=window.innerWidth;
+	c.height=window.innerHeight;
+}
+resize();
+
+window.addEventListener('resize',resize,false);
 </script>
 </body>
 </html>
