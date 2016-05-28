@@ -12,9 +12,8 @@
 	<canvas id="Canvas" height="100%" width="100%" style="position: fixed; display:block; z-index: 0; ">:c</canvas>
 	<canvas id="Canvas2" height="100%" width="100%" style="position: fixed; display:block; z-index: 1;"></canvas>
 </div>
+<audio id="dolbit" src="http://streamcluster02.true.nl:8000/qdance-hard" autoplay=1></audio>
 <script>
-var c = document.getElementById("Canvas");
-var ctx = c.getContext("2d");
 var l=document.getElementById;
 
 var x=[],y=[],dx=[0],dy=[0],d=[0];
@@ -32,6 +31,8 @@ var len=200;
 var par={x:0,y:0,n:{x:0,y:0}};
 function draw()
 {
+	var c = document.getElementById("Canvas");
+	var ctx = c.getContext("2d");
 	var l=x.length;
 	ctx.clearRect(0,0,c.width,c.height);
 //	ctx.fillStyle="#444466";
@@ -74,20 +75,25 @@ function draw()
 	}
 	ctx.translate(-par.x,-par.y);
 }
+var height;
+var width;
 function resize()
 {
 	var ss=document.getElementById("Canvas2");
+	var c = document.getElementById("Canvas");
 	c.width=window.innerWidth;
 	c.height=window.innerHeight;
 	ss.width=window.innerWidth;
 	ss.height=window.innerHeight;
+	height=c.height;
+	width=c.width;
 }
 resize();
 window.addEventListener('resize',resize,false);
 
 for(var i=0;i<100;i++)
 {
-	add(Math.random()*(c.width+2*len)-len,Math.random()*(c.height+2*len)-len);
+	add(Math.random()*(width+2*len)-len,Math.random()*(height+2*len)-len);
 }
 
 window.onmousemove=function(e)
@@ -95,8 +101,8 @@ window.onmousemove=function(e)
 	x[0] = e.offsetX;
 	y[0] = e.offsetY;
 
-	par.n.x=(x[0]-c.width/2)/30;
-	par.n.y=(y[0]-c.height/2)/30;
+	par.n.x=(x[0]-width/2)/30;
+	par.n.y=(y[0]-height/2)/30;
 
 	par.x+=(par.n.x-par.x)*0.01;
 	par.y+=(par.n.y-par.y)*0.01;
@@ -112,7 +118,7 @@ window.onclick=function(e)
 		add(x[0],y[0]);
 }/**/
 
-setInterval(draw,20);
+setInterval(function(){draw(); draw2();},20);
 </script>
 <script>
 var c2 = document.getElementById("Canvas2");
@@ -121,25 +127,79 @@ var ctx2=c2.getContext("2d");
 var sos=document.getElementsByClassName("sos");
 
 
-			var kal=[];
-			var vol=1;
-			var ses=0;
-			for(var i=0;i<vol;i++)
-			{
-				kal[i] = new Audio("http://streamcluster02.true.nl:8000/qdance-hard")
-				kal[i].oncanplay=function()
-				{
-					ses--;
-					if(!ses)
-					{
-						for(var i=0;i<vol;i++)
-							kal[i].play();
-					}
-				}
-				ses++;
-			}
+var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+var analyser = audioCtx.createAnalyser();
+
+var stream=document.getElementById("dolbit");
+
+stream.crossOrigin = "anonymous";
+
+source = audioCtx.createMediaElementSource(stream);
+source.connect(analyser);
+analyser.connect(audioCtx.destination);
+
+analyser.fftSize = 2048;
+var bufferLength = analyser.frequencyBinCount;
+var dataArray = new Uint8Array(bufferLength);
+
+var draw2 = function ()
+{
+	var c = document.getElementById("Canvas2");
+	var ctx = c.getContext("2d");
+
+	analyser.getByteTimeDomainData(dataArray);
+
+	ctx.clearRect(0,0,c.width,c.height);
+
+	ctx.beginPath()
+	ctx.strokeStyle="#ffffff";
+	ctx.moveTo(0,c.height/2);
+
+	for(var i=0;i<bufferLength; i++)
+	{
+		ctx.lineTo(i/bufferLength*c.width,((dataArray[i]/128-1)*10+1)*(c.height/2));
+	}
+	ctx.stroke();
+
+}
+
+/*
+var SoundCloudAudioSource = function(audioElement) {
+    var player = document.getElementById(audioElement);
+    var self = this;
+    var analyser;
+    var audioCtx = new (window.AudioContext || window.webkitAudioContext); // this is because it's not been standardised accross browsers yet.
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256; // see - there is that 'fft' thing. 
+    var source = audioCtx.createMediaElementSource(player); // this is where we hook up the <audio> element
+    source.connect(analyser);
+    analyser.connect(audioCtx.destination);
+    var sampleAudioStream = function() {
+        // This closure is where the magic happens. Because it gets called with setInterval below, it continuously samples the audio data
+        // and updates the streamData and volume properties. This the SoundCouldAudioSource function can be passed to a visualization routine and 
+        // continue to give real-time data on the audio stream.
+        analyser.getByteFrequencyData(self.streamData);
+        // calculate an overall volume value
+        var total = 0;
+        for (var i = 0; i < 80; i++) { // get the volume from the first 80 bins, else it gets too loud with treble
+            total += self.streamData[i];
+        }
+        self.volume = total;
+    };
+    setInterval(sampleAudioStream, 20); // 
+    // public properties and methods
+    this.volume = 0;
+    this.streamData = new Uint8Array(128); // This just means we will have 128 "bins" (always half the analyzer.fftsize value), each containing a number between 0 and 255. 
+    this.playStream = function(streamUrl) {
+        // get the input stream from the audio element
+        player.setAttribute('src', streamUrl);
+        player.play();
+    }
+};
+*/
 
 </script>
 <div class="sos" id="keks"></div>
 </body>
 </html>
+
