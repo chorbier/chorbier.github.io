@@ -122,16 +122,22 @@ var sos=document.getElementsByClassName("sos");
 
 
 			var kal=[];
-			var vol=3;
+			var vol=1;
+			var ses=0;
 			for(var i=0;i<vol;i++)
 			{
 				kal[i] = new Audio("http://streamcluster02.true.nl:8000/qdance-hard")
+				kal[i].oncanplay=function()
+				{
+					ses--;
+					if(!ses)
+					{
+						for(var i=0;i<vol;i++)
+							kal[i].play();
+					}
+				}
+				ses++;
 			}
-			setTimeout(function()
-			{
-				for(var i=0;i<vol;i++)
-					kal[i].play();
-			},2000)
 
 </script>
 <div class="sos" id="keks"></div>
