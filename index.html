@@ -9,10 +9,10 @@
 
 </style>
 <div id="posos" height="100%" width="100%" style="">
-	<canvas id="Canvas" height="100%" width="100%" style="position: fixed; display:block; z-index: 0; ">:c</canvas>
-	<canvas id="Canvas2" height="100%" width="100%" style="position: fixed; display:block; z-index: 1;"></canvas>
+	<canvas id="Canvas" height="100%" width="100%" style="position: fixed; display:block; z-index: 1; ">:c</canvas>
+	<canvas id="Canvas2" height="100%" width="100%" style="position: fixed; display:block; z-index: 0;"></canvas>
 </div>
-<audio id="dolbit" src="http://streamcluster02.true.nl:8000/qdance-hard" autoplay=1></audio>
+<audio id="dolbit" src="http://streamcluster02.true.nl:8000/qdance-hard" autoplay=1 crossOrigin = "anonymous"></audio>
 <script>
 var l=document.getElementById;
 
@@ -93,7 +93,7 @@ function resize()
 resize();
 window.addEventListener('resize',resize,false);
 
-for(var i=0;i<100;i++)
+for(var i=0;i<150;i++)
 {
 	add(Math.random()*(width+2*len)-len,Math.random()*(height+2*len)-len);
 }
@@ -135,85 +135,75 @@ stream.volume = 1;
 
 stream.crossOrigin = "anonymous";
 
-source = audioCtx.createMediaElementSource(stream);
-source.connect(analyser);
-analyser.connect(audioCtx.destination);
+var draw2=function (){};
 
-analyser.fftSize = 512;
-var bufferLength = analyser.frequencyBinCount;
-console.log(bufferLength);
-var dataArray = new Uint8Array(bufferLength);
-
-var asd=0;
-
-var draw2 = function ()
+stream.oncanplaythrough=function()
 {
-	var c = document.getElementById("Canvas");
-	var ctx = c.getContext("2d");
+	source = audioCtx.createMediaElementSource(stream);
+	source.connect(analyser);
+	analyser.connect(audioCtx.destination);
 
-	analyser.getByteFrequencyData(dataArray);
+	analyser.fftSize = 512;
+	var bufferLength = analyser.frequencyBinCount;
+	console.log(bufferLength);
+	var dataArray = new Uint8Array(bufferLength);
 
-	nv=0;
-	for(var i=0;i<bufferLength; i++)
+	var asd=0;
+	var kv=0;
+
+	draw2 = function ()
 	{
-		nv+=(dataArray[i])*(dataArray[i]);
-	}
-	nv=Math.sqrt(nv);
+		var c = document.getElementById("Canvas");
+		var ctx = c.getContext("2d");
 
-	var ses=clamp(nv-kv,0,Infinity);
+		analyser.getByteFrequencyData(dataArray);
 
-	asd=(asd+ses*0.8)%360;
+		nv=0;
+		for(var i=0;i<bufferLength; i++)
+		{
+			nv+=(dataArray[i])*(dataArray[i]);
+		}
+		nv=Math.sqrt(nv);
 
-//	document.body.style.backgroundColor = "hsl("+Math.round(asd)+",100%, "+clamp(Math.round(ses/5+5),10,100) +"%)";
-	document.body.style.backgroundColor = "hsl("+Math.round(240+ses/2)+",100%, "+clamp(Math.round(ses/2+10),10,100) +"%)";
+		var ses=clamp(nv-kv,0,Infinity)*(nv/2000);
 
-	kv=nv;
+		asd=(asd+ses*0.8)%360;
 
-	kek=clamp(ses/2,0,50)+1;
+	//	document.body.style.backgroundColor = "hsl("+Math.round(asd)+",100%, "+clamp(Math.round(ses/5+5),10,100) +"%)";
+		document.body.style.backgroundColor = "hsl("+Math.round(240+ses/2)+",100%, "+clamp(Math.round(ses/2+10),10,60) +"%)";
 
+		kv=nv;
+
+		kek=clamp(ses/2,0,50)+1;
+
+		var c = document.getElementById("Canvas2");
+		var ctx = c.getContext("2d");
+
+		ctx.globalAlpha=0.2;
+
+		ctx.clearRect(0,0,c.width,c.height);
+		var bl=bufferLength*0.6;
+		var blw=(c.width/2)/bl;
+		for(var i=0;i<bl; i++)
+		{
+			var s=dataArray[i]/512.0*(c.height);
+			ctx.fillStyle="hsl("+Math.round(240+dataArray[i]/3)+",100%, "+clamp(Math.round(dataArray[i]/5+10),40,70) +"%)";
+			ctx.fillRect(0+blw*(i),c.height/2-s,blw-1,s*2);
+			ctx.fillRect(c.width-blw*(i+0.2),c.height/2-s,blw-1,s*2);
+			//ctx.fillRect(0,c.height/2+blw*(i),dataArray[i]*4.0,blw-1);
+		}
+		ctx.globalAlpha=1;
+
+	}	
 }
+
+
 
 function clamp(a,b,c)
 {
 	return (a<b)?b:((a>c)?c:a);
 }
 
-var kv=0;
-
-/*
-var SoundCloudAudioSource = function(audioElement) {
-    var player = document.getElementById(audioElement);
-    var self = this;
-    var analyser;
-    var audioCtx = new (window.AudioContext || window.webkitAudioContext); // this is because it's not been standardised accross browsers yet.
-    analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 256; // see - there is that 'fft' thing. 
-    var source = audioCtx.createMediaElementSource(player); // this is where we hook up the <audio> element
-    source.connect(analyser);
-    analyser.connect(audioCtx.destination);
-    var sampleAudioStream = function() {
-        // This closure is where the magic happens. Because it gets called with setInterval below, it continuously samples the audio data
-        // and updates the streamData and volume properties. This the SoundCouldAudioSource function can be passed to a visualization routine and 
-        // continue to give real-time data on the audio stream.
-        analyser.getByteFrequencyData(self.streamData);
-        // calculate an overall volume value
-        var total = 0;
-        for (var i = 0; i < 80; i++) { // get the volume from the first 80 bins, else it gets too loud with treble
-            total += self.streamData[i];
-        }
-        self.volume = total;
-    };
-    setInterval(sampleAudioStream, 20); // 
-    // public properties and methods
-    this.volume = 0;
-    this.streamData = new Uint8Array(128); // This just means we will have 128 "bins" (always half the analyzer.fftsize value), each containing a number between 0 and 255. 
-    this.playStream = function(streamUrl) {
-        // get the input stream from the audio element
-        player.setAttribute('src', streamUrl);
-        player.play();
-    }
-};
-*/
 
 </script>
 <div class="sos" id="keks"></div>
