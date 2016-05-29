@@ -12,7 +12,7 @@
 	<canvas id="Canvas" height="100%" width="100%" style="position: fixed; display:block; z-index: 1; ">:c</canvas>
 	<canvas id="Canvas2" height="100%" width="100%" style="position: fixed; display:block; z-index: 0;"></canvas>
 </div>
-<audio id="dolbit" src="materials/Carpenter Brut - Anarchy Road.mp3" autoplay=1 crossOrigin = "anonymous"></audio>
+<audio id="dolbit" src="http://chorbier.github.io/materials/Carpenter%20Brut%20-%20Anarchy%20Road.mp3" autoplay=1 crossOrigin = "anonymous"></audio>
 <script>
 var l=document.getElementById;
 
@@ -179,7 +179,7 @@ stream.oncanplaythrough=function()
 		var c = document.getElementById("Canvas2");
 		var ctx = c.getContext("2d");
 
-		ctx.globalAlpha=0.2;
+		ctx.globalAlpha=0.5;
 
 		ctx.clearRect(0,0,c.width,c.height);
 		var bl=bufferLength*0.6;
@@ -187,7 +187,7 @@ stream.oncanplaythrough=function()
 		for(var i=0;i<bl; i++)
 		{
 			var s=dataArray[i]/512.0*(c.height);
-			ctx.fillStyle="hsl("+Math.round(240+dataArray[i]/3)+",100%, "+clamp(Math.round(dataArray[i]/5+10),40,70) +"%)";
+			ctx.fillStyle="hsl("+Math.round(240+i/2+dataArray[i]/10)+",100%, "+clamp(Math.round(dataArray[i]/10+30),30,60) +"%)";
 			ctx.fillRect(0+blw*(i),c.height/2-s,blw-1,s*2);
 			ctx.fillRect(c.width-blw*(i+0.2),c.height/2-s,blw-1,s*2);
 			//ctx.fillRect(0,c.height/2+blw*(i),dataArray[i]*4.0,blw-1);
