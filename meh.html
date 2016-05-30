@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+<style>
+	* { margin:0; padding:0;}
+	body {background-color:#111322} 
+
+</style>
+<canvas id="Canvas" height="100%" width="100%" style="position: fixed; display:block;">:c</canvas>
+<script>
+var c = document.getElementById("Canvas");
+var ctx=c.getContext("2d");
+function resize()
+{
+	c.width=window.innerWidth;
+	c.height=window.innerHeight;
+}
+resize();
+window.addEventListener('resize',resize,false);
+
+var size=10;
+var img = new Image();
+
+
+function part(x,y)
+{
+	this.x=x;
+	this.y=y;
+	this.dx=0;
+	this.dy=0;
+	this.xx=x;
+	this.yy=y;
+	this.sx=size;
+	this.sy=size;
+	this.draw=function()
+	{
+		this.dx*=0.999;
+		this.dy*=0.999;
+		this.x+=this.dx;
+		this.y+=this.dy;
+		ctx.drawImage(img,this.xx,this.yy,this.sx,this.sy,this.x,this.y,this.sx,this.sy);
+	}
+}
+
+var parts=[];
+
+function draw()
+{
+	ctx.clearRect(0,0,c.width,c.height);
+	for(var i in parts)
+	{
+		parts[i].draw();
+	}
+}
+
+function split()
+{
+	img = new Image();
+	img.src=c.toDataURL();
+	parts=[];
+	for(var x=0;x<c.width;x+=size)
+	{
+		for(var y=0;y<c.height;y+=size)
+		{
+			var sos=false;
+			var id=ctx.getImageData(x,y,size,size).data;
+			for(var i = 0;i<id.length;i+=4)
+				if(id[i]>0)
+				{
+					sos=true;
+					break;
+				}
+			if(sos)
+				parts.push(new part(x,y));
+		}
+	}
+}
+
+ctx.fillStyle="#aaaaff";
+ctx.font="400px Arial"
+ctx.fillText("PIZDUY",200,400);
+split();
+
+
+window.onclick=function(e)
+{
+	var x=e.offsetX;
+	var y=e.offsetY;
+
+	for(var i in parts)
+	{
+		var p=parts[i];
+		var dx=(p.x-x);
+		var dy=(p.y-y);
+		var d=Math.sqrt(dx*dx+dy*dy);
+		p.dx+=dx/d/d*100;
+		p.dy+=dy/d/d*100;
+	}
+}/**/
+
+setInterval(function(){draw();},20);
+
+</script>
+</body>
+</html>
+
