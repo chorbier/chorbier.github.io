@@ -55,10 +55,7 @@ var fors=0;
 
 function leval(vl,fr)
 {
-	if(fr==null)
-		vl=vl.replace(/([^a-z\d\.]|^)([a-z][\da-z]*)(?=[^\(a-z\d\.])/ig,"$1localVars.$2");
-	else
-		vl=vl.replace(/([^a-z\d\.]|^)([a-z][\da-z]*)(?=[^\(a-z\d\.])/ig,"$1localVars.f"+fr+".$2");
+	vl=vl.replace(/([^a-z\d\.]|^)([a-z][\da-z]*)(?=[^\(a-z\d\.]|$)/ig,"$1localVars.$2");
 	try
 	{
 		return eval(vl);
