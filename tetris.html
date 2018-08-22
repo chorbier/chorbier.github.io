@@ -1,0 +1,168 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <title>Tetris</title>
+    </head>
+    <body>
+        <canvas id="a">
+        </canvas>
+		<a id="text" ></a>
+        <script>
+			function game()
+			{
+				var cv = document.getElementById("a");
+				var c = cv.getContext("2d");
+				cv.width=200;
+				cv.height=400;
+				this.figs={0:{form:[[1,1,1,1]],ox:1,oy:2},1:{form:[[0,0,1],[1,1,1],[0,0,0]],ox:2,oy:2},2:{form:[[1,0,0],[1,1,1],[0,0,0]],ox:2,oy:2},3:{form:[[0,0,0],[1,1,1],[0,1,0]],ox:2,oy:2},4:{form:[[1,1],[1,1]],ox:1,oy:1},5:{form:[[0,1,1],[1,1,0]],ox:1,oy:2},6:{form:[[1,1,0],[0,1,1]],ox:1,oy:2},};
+				this.field=[];
+				this.points=0;
+				this.clearFiled = function()
+				{
+					for(var i=0;i<10;i++)
+					{
+						this.field[i]=[];
+						for(var j=0;j<20;j++)
+							this.field[i][j]=0;
+					}
+					this.points=0;
+				}
+				this.clearFiled();
+				this.createFigure = function()
+				{
+					var rn=Math.floor(Math.random()*7);
+					this.figure={form:this.figs[rn].form.slice(0),ox:this.figs[rn].ox,oy:this.figs[rn].oy,x:4,y:1};
+					if(this.checkCollision(0,0))
+						this.clearFiled();
+				}
+				this.draw=function()
+				{
+					c.clearRect(0,0,cv.width,cv.height);
+					for(var i=0;i<10;i++)
+					{
+						for(var j=0;j<20;j++)
+						{
+							c.strokeRect(i*20,j*20,19,19)
+							if(this.field[i][j])
+								c.fillRect(i*20,j*20,19,19);
+						}
+					}
+					for(var i=0;i<this.figure.form.length;i++)
+					{
+						for(var j=0;j<this.figure.form[i].length;j++)
+						{
+							if(this.figure.form[i][j])
+								c.fillRect((this.figure.x-this.figure.ox+i)*20,(this.figure.y-this.figure.oy+j)*20,19,19);
+						}
+					}
+				}
+				this.checkRows = function()
+				{
+					var pa=0;
+					var k=19;
+					for(var j=19;j>=0;j--)
+					{
+						var t=0;
+						for(var i=0;i<10;i++)
+						{
+							t+=this.field[i][j];
+							this.field[i][k]=this.field[i][j];
+						}
+						if(t==10)
+							pa=pa*2+100;
+						else
+							k--;
+					}
+					this.points+=pa;
+					this.draw();
+				}
+				this.checkCollision = function(xx,yy)
+				{
+					for(var i=0;i<this.figure.form.length;i++)
+						for(var j=0;j<this.figure.form[i].length;j++)
+							if(this.figure.form[i][j])
+							{
+								var xxx=this.figure.x-this.figure.ox+i+xx;
+								var yyy=this.figure.y-this.figure.oy+j+yy;
+								if(xxx<0 || xxx>9 || yyy>=20 || this.field[xxx][yyy])
+									return true;
+							}
+					return false;
+				}
+				this.createFigure();
+				this.step = function()
+				{
+					if(this.checkCollision(0,1))
+					{
+						for(var i=0;i<this.figure.form.length;i++)
+							for(var j=0;j<this.figure.form[i].length;j++)
+								if(this.figure.form[i][j])
+									this.field[(this.figure.x-this.figure.ox+i)][(this.figure.y-this.figure.oy+j)]=this.figure.form[i][j];
+						this.createFigure();
+						this.checkRows();
+					}
+					else
+						this.figure.y++;
+					this.draw();
+				}
+				this.move = function(xx)
+				{
+					if(!this.checkCollision(xx,0))
+						this.figure.x+=xx;
+					this.draw();
+				}
+				this.rotate = function()
+				{
+					var nForm=[];
+					for(var j=0;j<this.figure.form[0].length;j++)
+						nForm[j]=[];
+					for(var i=0;i<this.figure.form.length;i++)
+						for(var j=0;j<this.figure.form[i].length;j++)
+						{
+							nForm[this.figure.form[i].length-j-1][i]=this.figure.form[i][j];
+						}
+					var of=this.figure.form;
+					this.figure.form=nForm;
+					var sosx=this.figure.ox;
+					var sosy=this.figure.oy;
+					this.figure.ox=sosy;
+					this.figure.oy=sosx;
+					if(this.checkCollision(0,0))
+					{
+						this.figure.form=of;
+						this.figure.ox=sosx;
+						this.figure.oy=sosy;
+					}
+					this.draw();
+				}
+				this.drop = function()
+				{
+					var yo=0;
+					while(!this.checkCollision(0,yo+1))
+					{
+						yo++;
+					}
+					this.figure.y+=yo;
+					this.step();
+				}
+			}
+			var g = new game();
+			var TID=setInterval(function()
+			{
+				g.step();
+				document.getElementById("text").text=g.points+"";
+			},500);
+			document.onkeydown = function(e)
+			{
+				if(e.keyCode==37)
+					g.move(-1);
+				else if(e.keyCode==39)
+					g.move(1);
+				else if(e.keyCode==38)
+					g.rotate();
+				else if(e.keyCode==40)
+					g.drop();
+			}
+		</script>
+    </body>
+</html>

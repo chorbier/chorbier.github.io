@@ -1,0 +1,249 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <title>FuckFace</title>
+    </head>
+    <body>
+        <canvas id="a">
+        </canvas>
+        <script>
+			var cv = document.getElementById("a");
+			var c = cv.getContext("2d");
+			cv.width=2000;
+			cv.height=2000;
+			var mooving=false;
+			var creating=false;
+			var gs=10;
+			
+			var AllG=[];
+			var cnt=0;
+			
+			var debug=false;
+			var dbg=[];
+			
+			function gear(x,y)
+			{
+				this.x=x;
+				this.y=y;
+				this.ang=0;
+				this.c=2;
+				this.active=false;
+				this.color="#000000";
+				this.parent=-1;
+				this.r=((Math.sqrt(9*this.c*this.c+4*Math.PI*this.c+4*Math.PI*Math.PI)+3*this.c-2*Math.PI)*gs)/(4*Math.PI);
+//				this.vel=(Math.random()-0.5)/50;
+				this.vel=0.01;
+				this.aa={};
+				this.setAng=function(Ang)
+				{
+					this.ang=Ang;
+				}
+				
+				this.act=function()
+				{
+					this.ang=(this.ang+this.vel);
+				}
+				
+				this.setR=function(r)
+				{
+					this.c = Math.ceil((2*Math.PI*r*(r+gs))/(gs*(3*r+2*gs)));
+					if(this.c<2)
+						this.c=2;
+					this.r=((Math.sqrt(9*this.c*this.c+4*Math.PI*this.c+4*Math.PI*Math.PI)+3*this.c-2*Math.PI)*gs)/(4*Math.PI);
+				}
+				this.setC=function(c)
+				{
+					this.c=c;
+					this.r=((Math.sqrt(9*this.c*this.c+4*Math.PI*this.c+4*Math.PI*Math.PI)+3*this.c-2*Math.PI)*gs)/(4*Math.PI);
+				}
+				this.draw=function()
+				{
+					c.beginPath();
+					var ang=0;
+					
+					var R1=this.r;
+					var R2=R1+gs;
+					
+					var a1=gs/R1;
+					var a2=a1/2;
+					var a3=gs/R2;
+					this.aa={a1:a1,a2:a2,a3:a3};
+					c.moveTo(this.x+Math.cos(ang+this.ang)*R1,this.y+Math.sin(ang+this.ang)*R1);
+					c.strokeStyle=this.color;
+					for(var i=0;i<this.c;i++)
+					{
+						ang+=a1;
+						c.lineTo(this.x+Math.cos(ang+this.ang)*R1,this.y+Math.sin(ang+this.ang)*R1);
+						ang+=a2;
+						c.lineTo(this.x+Math.cos(ang+this.ang)*R2,this.y+Math.sin(ang+this.ang)*R2);
+						ang+=a3;
+						c.lineTo(this.x+Math.cos(ang+this.ang)*R2,this.y+Math.sin(ang+this.ang)*R2);
+						ang+=a2;
+						c.lineTo(this.x+Math.cos(ang+this.ang)*R1,this.y+Math.sin(ang+this.ang)*R1);
+					}
+					c.stroke();
+					if(this.r>20)
+					{
+						c.beginPath();
+						c.arc(this.x,this.y,R1-15,0,2*Math.PI);
+						c.stroke();
+						if(debug)
+						{
+							c.font="8px Arial";
+							c.textAlign="center";
+							c.textBaseline="middle";
+							c.fillStyle="#000000";
+							c.fillText(this.parent+"\n"+this.active,this.x,this.y);
+						}
+					}
+				}
+			}
+			
+			function createGear(x,y)
+			{
+				AllG[cnt++]=new gear(x,y);
+			}
+			var startx=0,starty=0;
+			
+			var relx=0,rely=0,CI=0;
+			function dist(x1,y1,x2,y2)
+			{
+				return Math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
+			}
+			cv.onmousedown=function(e)
+			{
+				var x = (e.pageX-cv.offsetLeft);
+				var y = (e.pageY-cv.offsetTop);
+				for(var i=0;i<cnt;i++)
+				{
+					if(dist(x,y,AllG[i].x,AllG[i].y) < AllG[i].r)
+					{
+						CI=i;
+						relx=AllG[i].x-x;//-------------------------
+						rely=AllG[i].y-y;
+						AllG[i].color="#227777";
+						mooving=true;
+						return;
+					}
+				}
+				creating=true;
+				createGear(x,y);
+				if(cnt==1)
+				{					
+					AllG[0].active=true;
+					AllG[0].color="#ff0000";
+				}
+				startx=x;
+				starty=y;				
+			}
+			cv.onmouseup=function(e)
+			{
+				creating=false;
+				if(mooving)
+				{
+					AllG[CI].color="#000000";
+					mooving=false;
+				}
+			}
+			cv.onmousemove=function(e)
+			{
+				var x = (e.pageX-cv.offsetLeft);
+				var y = (e.pageY-cv.offsetTop);
+				if(creating)
+				{
+					var g=AllG[cnt-1];
+					var pc=g.c;
+					g.setR(dist(x,y,startx,starty));
+					for(var i=0;i<(cnt-1);i++)
+					{
+						var gg=AllG[i];
+						if(dist(gg.x,gg.y,g.x,g.y) < (gg.r+g.r+gs))
+						{
+							g.setC(pc);
+							break;
+						}
+					}
+				}
+				else if(mooving)
+				{
+					var g=AllG[CI];
+					var nx=x+relx, ny=y+rely;
+					var sos=true;
+					for(var i=0;i<cnt;i++)
+						if(i!=CI)
+						{
+							var gg=AllG[i];
+							var dis=dist(gg.x,gg.y,nx,ny);
+							if(dis < (gg.r+g.r+gs))
+							{
+								if(sos)
+								{
+									sos=false;
+									nx=gg.x+(nx-gg.x)/dis*(gg.r+g.r+gs);
+									ny=gg.y+(ny-gg.y)/dis*(gg.r+g.r+gs);
+								}
+								else
+									return;
+							}
+						}
+				g.x=nx;
+				g.y=ny;
+				}
+			}
+			function checkChild(gi)
+			{
+				var g=AllG[gi],x=g.x,y=g.y;
+				for(var j=0;j<cnt;j++)
+					if(j!=gi)
+					{
+						var gg=AllG[j];
+						if(dist(x,y,gg.x,gg.y) < (g.r+gg.r+2*gs))
+						{
+							if(!(gg.active) && (gg.parent==-1))
+							{
+								gg.color=g.color;
+								gg.parent=g.active?gi:g.parent;
+								var rela=Math.atan2((y-gg.y),(gg.x-x));
+								dbg[0]=rela+"";
+		//						var dis=dist(gg.x,gg.y,x,y)-g.r-gg.r;
+								gg.setAng(-(g.ang+rela)*(g.c/gg.c)-rela-gg.aa.a1+((gg.c%2)?0:(Math.PI/gg.c)));
+//								gg.setAng(-((g.ang+rela)/(gg.r+dis/2))*(g.r+dis/2)-rela);
+//								alert(j+" "+gg.parent)
+								checkChild(j);
+//								break;
+							}
+						}
+					}
+			}
+			var TID=setInterval(function()
+			{
+				dbg=[];
+				for(var i=0;i<cnt;i++)
+				{
+					if(AllG[i].active)
+					{
+						AllG[i].act();
+						checkChild(i);
+					}
+				}
+				c.clearRect(0,0,cv.width,cv.height);
+				for(var i=0;i<cnt;i++)
+				{
+					AllG[i].draw();
+					AllG[i].parent=-1;
+				}
+				if(debug)
+				{
+					c.font="15px Arial";
+					c.textAlign="left";
+					c.textBaseline="hanging";
+					c.fillStyle="#000000";
+					for(var i=0;i<dbg.length;i++)
+					{
+						c.fillText(dbg[i],20*i,10);
+					}
+				}
+			},10)
+		</script>
+    </body>
+</html>
