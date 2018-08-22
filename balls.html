@@ -1,0 +1,137 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <title>FuckFace</title>
+    </head>
+    <body>
+        <canvas id="a">
+        </canvas>
+        <script>
+		//========================================================================================================================================================
+		var cv = document.getElementById("a");
+		var c = cv.getContext("2d");
+		
+		var ab=[];
+		var cc=0;
+		
+		cv.width=500;
+		cv.height=500;
+		function ball(lx,ly)
+		{
+			this.x=lx;
+			this.y=ly;
+			this.dx=0;
+			this.dy=0;
+			this.r=10;
+			this.c="#000000";
+			this.m=1;
+			this.kick = function(px,py)
+			{
+				this.dx+=px/this.m;
+				this.dy+=py/this.m;
+			}
+			this.draw=function()
+			{
+				c.beginPath();
+				c.arc(this.x,this.y,this.r,0,2*Math.PI);
+				c.stroke();
+			}
+			this.step = function()
+			{
+				this.x+=this.dx;
+				this.y+=this.dy;
+			}
+		}
+		
+		function CreateBall(x,y)
+		{
+			ab[cc]=new ball(x,y);
+			return ab[cc++];
+		}
+		var multp=0.7;
+		function CheckCollision(b1,b2)
+		{
+			var vx=b2.x-b1.x;
+			var vy=b2.y-b1.y;
+			var len=Math.sqrt(vx*vx+vy*vy);
+			vx=vx/len;
+			vy=vy/len;
+			if(len<(b1.r+b2.r))
+			{
+				var p1x=(vx*(vx*b1.dx+vy*b1.dy))*b1.m;
+				var p1y=(vy*(vx*b1.dx+vy*b1.dy))*b1.m;
+				var p2x=(vx*(vx*b2.dx+vy*b2.dy))*b1.m;
+				var p2y=(vy*(vx*b2.dx+vy*b2.dy))*b1.m;
+				var mv=((b1.r+b2.r)-len)*1;
+				b1.kick(-p1x+p2x*multp,-p1y+p2y*multp);
+				b2.kick(-p2x+p1x*multp,-p2y+p1y*multp);
+				b1.x-=mv*vx;
+				b1.y-=mv*vy;
+				b2.x+=mv*vx;
+				b2.y+=mv*vy;				
+//				b1.step();
+//				b2.step();
+			}
+		}
+		
+		var TID=setInterval(function()
+		{
+			c.clearRect(0,0,500,500);
+			for(var i=0;i<cc;i++)
+			{
+				var bl=ab[i];
+				var sos=3;
+				bl.kick(0,0.1*bl.m);
+				bl.step();
+				while(sos--)
+				{
+						
+					if(bl.x-bl.r<0)
+					{
+						bl.dx=-multp*bl.dx;
+						bl.x=bl.r;
+						bl.step();
+					}
+					if(bl.x+bl.r>500)
+					{
+						bl.dx=-multp*bl.dx;
+						bl.x=500-bl.r;
+						bl.step();
+					}
+					
+					if(bl.y-bl.r<0)
+					{
+						bl.dy=-multp*bl.dy;
+						bl.y=bl.r;
+						bl.step();
+					}			
+					if(bl.y+bl.r>500)
+					{
+						bl.dy=-multp*bl.dy;
+						bl.y=500-bl.r;
+						bl.step();
+					}			
+					for(var j=i+1;j<cc;j++)
+					{
+						CheckCollision(bl,ab[j]);
+					}
+				}
+				bl.draw();
+				bl.step();
+			}
+		},10)
+		/*
+		CreateBall(50,50);
+		CreateBall(200,55);
+		ab[1].kick(-2,0);
+		ab[0].kick(2,0);
+		/**/
+		cv.onclick = function(e,ui)
+		{
+			var x = (e.pageX-cv.offsetLeft);
+			var y = (e.pageY-cv.offsetTop);
+			CreateBall(x,y);
+		}
+		</script>
+    </body>
+</html>
