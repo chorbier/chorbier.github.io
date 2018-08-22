@@ -47,12 +47,12 @@ let remoteDataShow = function()
 }
 function loadRtc()
 {
-	var servers = null;
+	var pc_config = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
 	let onMessageReceive = e =>
 	{
 		console.log(`message received: ${e.data}`);
 	};
-	pc = new RTCPeerConnection(servers);
+	pc = new RTCPeerConnection(pc_config);
 	dataChannel = pc.createDataChannel('dataChannel');
 	dataChannel.onopen = () =>
 	{
@@ -88,7 +88,6 @@ $(document).ready(function($) {
 			},
 			err => console.log(`chot obosralos ${err}`));
 	});
-
 
 	$('button.answer').click(function(event) {
 		let data = JSON.parse($('input#rDesc')[0].value);
