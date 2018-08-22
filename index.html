@@ -20,6 +20,10 @@ var x=[],y=[],dx=[0],dy=[0],d=[0];
 
 var kek=1;
 
+var aplayer = document.getElementById('dolbit');
+
+document.addEventListener('click',() => {aplayer.play(); aplayer.volume = 0.3;});
+
 function add(xx,yy)
 {
 	x.push(xx);
@@ -170,7 +174,7 @@ stream.oncanplaythrough=function()
 		asd=(asd+ses*0.8)%360;
 
 	//	document.body.style.backgroundColor = "hsl("+Math.round(asd)+",100%, "+clamp(Math.round(ses/5+5),10,100) +"%)";
-		document.body.style.backgroundColor = "hsl("+Math.round(240+ses/2)+",100%, "+clamp(Math.round(ses/2+10),10,40) +"%)";
+		document.body.style.backgroundColor = `hsl(${Math.round(240+ses/2)}, 100%, ${clamp(Math.round(ses/10+10),10,20)}%)`;// "hsl("+Math.round(240+ses/2)+",100%, "+clamp(Math.round(ses/2+10),10,40) +"%)";
 
 		kv=nv;
 
