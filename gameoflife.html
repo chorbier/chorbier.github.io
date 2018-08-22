@@ -1,0 +1,114 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <title>Game of life</title>
+    </head>
+    <body>
+        <canvas id="a">
+        </canvas>
+		<br>
+		<button id="stepB">step</button>
+		<button id="playB">play</button>
+		<button id="stopB">stop</button>
+		<button onclick="g.clearField()">clear</button>
+		<button onclick="g.randomize()">randomize</button>		
+        <script>
+			var cv = document.getElementById("a");
+			var c = cv.getContext("2d");
+			function game()
+			{
+				this.w=40;
+				this.h=40;
+				this.cs=15;
+				this.field1=[];
+				this.field2=[];
+				this.running=false;
+				this.clearField = function()
+				{
+					for(var i=0;i<this.w;i++)
+					{
+						this.field1[i]=[];
+						this.field2[i]=[];
+						for(var j=0;j<this.h;j++)
+						{
+							this.field1[i][j]=false;
+							this.field2[i][j]=false;
+						}
+					}
+					this.draw();
+				}
+				cv.width=this.w*this.cs;
+				cv.height=this.h*this.cs;
+				this.step = function()
+				{
+					for(var i=0;i<this.w;i++)
+						for(var j=0;j<this.h;j++)
+						{
+							var lc=0;
+							for(var ii=i-1;ii<i+2;ii++)
+								for(var jj=j-1;jj<j+2;jj++)
+								{
+									var iii=ii<0?(this.w-1):(ii==this.w?0:ii);
+									var jjj=jj<0?(this.h-1):(jj==this.h?0:jj);									
+									lc+=this.field1[iii][jjj];
+									//alert("flag "+ii+" "+jj+" "+iii+" "+jjj);
+								}
+								
+							if((this.field1[i][j] && (lc==3 || lc==4)) || (!this.field1[i][j] && lc==3))
+								this.field2[i][j]=true;
+							else
+								this.field2[i][j]=false;
+						}
+					var fl=this.field1;
+					this.field1=this.field2;
+					this.field2=fl;
+					this.draw();
+				}
+				this.change = function(x,y)
+				{
+					this.field1[x][y]=!this.field1[x][y];
+					this.draw();
+				}
+				this.draw = function()
+				{
+					c.clearRect(0,0,cv.width,cv.height);
+					for(var i=0;i<this.w;i++)
+						for(var j=0;j<this.h;j++)
+						{
+							c.strokeRect(i*this.cs,j*this.cs,this.cs,this.cs)
+							if(this.field1[i][j])
+								c.fillRect(i*this.cs,j*this.cs,this.cs,this.cs);
+						}
+				}
+				this.randomize = function()
+				{
+					for(var i=0;i<this.w;i++)
+						for(var j=0;j<this.h;j++)
+							this.field1[i][j]=Math.random()<0.5;
+					this.draw();
+				}
+				this.clearField();
+			}
+			var g=new game();
+			var aa=[[1,1,1,0,1,1,1],[1,0,1,0,1,0,1],[1,1,1,0,1,0,1],[0,0,1,0,1,0,1],[1,1,1,0,1,1,1]];
+			for(var i=0;i<7;i++)
+				for(var j=0;j<5;j++)
+					g.field1[i+10][j+10]=aa[j][i];
+			g.draw();
+			var TID=setInterval(function()
+			{
+				if(g.running)
+					g.step();
+			},10);
+			document.getElementById("stepB").onclick=function(){g.step()};
+			document.getElementById("playB").onclick=function(){g.running=true};
+			document.getElementById("stopB").onclick=function(){g.running=false};
+			cv.onclick = function(e)
+			{
+				var x = Math.floor((e.pageX-cv.offsetLeft)/g.cs);
+				var y = Math.floor((e.pageY-cv.offsetTop)/g.cs);
+				g.change(x,y);
+			}
+		</script>
+    </body>
+</html>
