@@ -48,43 +48,51 @@ let remoteDataShow = function()
 function loadRtc()
 {
 	var pc_config = {"iceServers": [
-		{url:'stun:stun.ekiga.net'},
-		{url:'stun:stun.ideasip.com'},
-		{url:'stun:stun.rixtelecom.se'},
-		{url:'stun:stun.schlund.de'},
-		{url:'stun:stun.l.google.com:19302'},
-		{url:'stun:stun1.l.google.com:19302'},
-		{url:'stun:stun2.l.google.com:19302'},
-		{url:'stun:stun3.l.google.com:19302'},
-		{url:'stun:stun4.l.google.com:19302'},
-		{url:'stun:stunserver.org'},
-		{url:'stun:stun.softjoys.com'},
-		{url:'stun:stun.voiparound.com'},
-		{url:'stun:stun.voipbuster.com'},
-		{url:'stun:stun.voipstunt.com'},
-		{url:'stun:stun.voxgratia.org'},
-		{url:'stun:stun.xten.com'},
-		{url:'stun:sip1.lakedestiny.cordiaip.com'},
-		{url:'stun:stun1.voiceeclipse.net'},
-		{url:'stun:stun.callwithus.com'},
-		{url:'stun:stun.counterpath.net'},
-		{url:'stun:stun.ekiga.net'},
-		{url:'stun:stun.ideasip.com'},
-		{url:'stun:stun.internetcalls.com'},
-		{url:'stun:stun.noc.ams-ix.net'},
-		{url:'stun:stun.phoneserve.com'},
-		{url:'stun:stun.softjoys.com'},
-		{url:'stun:stun.sipgate.net'},
-		{url:'stun:stun.sipgate.net:10000'},
-		{url:'stun:stun.stunprotocol.org'},
-		{url:'stun:stun.voip.aebc.com'},
-		{
-			url:"turn:13.250.13.83:3478?transport=udp",
-			username: "YzYNCouZM1mhqhmseWk6",
-			credential: "YzYNCouZM1mhqhmseWk6"
-		}
-]};
-			let onMessageReceive = e =>
+			{url:'stun:stun.ekiga.net'},
+			{url:'stun:stun.ideasip.com'},
+			{url:'stun:stun.rixtelecom.se'},
+			{url:'stun:stun.schlund.de'},
+			{url:'stun:stun.l.google.com:19302'},
+			{url:'stun:stun1.l.google.com:19302'},
+			{url:'stun:stun2.l.google.com:19302'},
+			{url:'stun:stun3.l.google.com:19302'},
+			{url:'stun:stun4.l.google.com:19302'},
+			{url:'stun:stun.voiparound.com'},
+			{url:'stun:stun.voipbuster.com'},
+			{url:'stun:stun.voipstunt.com'},		
+			{url:'stun:stun.voxgratia.org'},		
+			{url:'stun:stun.xten.com'},	
+			{url:'stun:sip1.lakedestiny.cordiaip.com'},
+			{url:'stun:stun.callwithus.com'},	
+			{url:'stun:stun.counterpath.net'},		
+			{url:'stun:stun.ekiga.net'},	
+			{url:'stun:stun.ideasip.com'},	
+			{url:'stun:stun.internetcalls.com'},
+			{url:'stun:stun.sipgate.net'},
+			{url:'stun:stun.sipgate.net:10000'},
+			{url:'stun:stun.voip.aebc.com'},
+			{
+				url:"turn:13.250.13.83:3478?transport=udp",
+				username: "YzYNCouZM1mhqhmseWk6",
+				credential: "YzYNCouZM1mhqhmseWk6"
+			},
+			{
+				url: 'turn:numb.viagenie.ca',
+				username: 'sti49045@nbzmr.com',
+				credential: 'dDgShSxsDddfFSsdfIHsFEQ'
+			},
+			{
+				url: 'turn:numb.viagenie.ca',
+				credential: 'muazkh',
+				username: 'webrtc@live.com'
+			},
+			{
+				url: 'turn:turn.bistri.com:80',
+				credential: 'homeo',
+				username: 'homeo'
+			}
+		]};
+	let onMessageReceive = e =>
 	{
 		console.log(`message received: ${e.data}`);
 	};
@@ -98,6 +106,8 @@ function loadRtc()
 	dataChannel.onmessage = onMessageReceive;
 	pc.onicecandidate = e => 
 	{
+		if(!e)
+			return;
 		//pc.addIceCandidate(e.candidate);
 		remoteData.ice.push(e.candidate);
 		remoteDataShow();
