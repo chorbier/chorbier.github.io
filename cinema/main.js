@@ -48,6 +48,7 @@ let remoteDataShow = function()
 function loadRtc()
 {
 	var pc_config = {"iceServers": [
+		{url:'stun.ipshka.com'},
 		{url:'stun:stun01.sipphone.com'},
 		{url:'stun:stun.ekiga.net'},
 		{url:'stun:stun.fwdnet.net'},
@@ -66,8 +67,22 @@ function loadRtc()
 		{url:'stun:stun.voipbuster.com'},
 		{url:'stun:stun.voipstunt.com'},
 		{url:'stun:stun.voxgratia.org'},
-		{url:'stun:stun.xten.com'}]};
-	let onMessageReceive = e =>
+		{url:'stun:stun.xten.com'},
+		{url:'sip1.lakedestiny.cordiaip.com'},
+		{url:'stun1.voiceeclipse.net'},
+		{url:'stun.callwithus.com'},
+		{url:'stun.counterpath.net'},
+		{url:'stun.ekiga.net'},
+		{url:'stun.ideasip.com'},
+		{url:'stun.internetcalls.com'},
+		{url:'stun.noc.ams-ix.net'},
+		{url:'stun.phoneserve.com'},
+		{url:'stun.softjoys.com'},
+		{url:'stun.sipgate.net'},
+		{url:'stun.sipgate.net:10000'},
+		{url:'stun.stunprotocol.org'},
+		{url:'stun.voip.aebc.com'}]};
+			let onMessageReceive = e =>
 	{
 		console.log(`message received: ${e.data}`);
 	};
