@@ -81,7 +81,12 @@ function loadRtc()
 		{url:'stun:stun.sipgate.net'},
 		{url:'stun:stun.sipgate.net:10000'},
 		{url:'stun:stun.stunprotocol.org'},
-		{url:'stun:stun.voip.aebc.com'}]};
+		{url:'stun:stun.voip.aebc.com'},
+		{
+			url: 'turn:numb.viagenie.ca',
+			credential: '1488asdf',
+			username: 'eyx80434@nbzmr.com'
+		}]};
 			let onMessageReceive = e =>
 	{
 		console.log(`message received: ${e.data}`);
