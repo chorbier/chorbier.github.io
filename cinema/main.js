@@ -83,10 +83,11 @@ function loadRtc()
 		{url:'stun:stun.stunprotocol.org'},
 		{url:'stun:stun.voip.aebc.com'},
 		{
-			url: 'turn:numb.viagenie.ca',
-			credential: '1488asdf',
-			username: 'eyx80434@nbzmr.com'
-		}]};
+			url:"turn:13.250.13.83:3478?transport=udp",
+			username: "YzYNCouZM1mhqhmseWk6",
+			credential: "YzYNCouZM1mhqhmseWk6"
+		}
+]};
 			let onMessageReceive = e =>
 	{
 		console.log(`message received: ${e.data}`);
