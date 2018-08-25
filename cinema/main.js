@@ -48,7 +48,7 @@ let remoteDataShow = function()
 function loadRtc()
 {
 	var pc_config = {"iceServers": [
-		{url:'stun.ipshka.com'},
+		{url:'stun:stun.ipshka.com'},
 		{url:'stun:stun01.sipphone.com'},
 		{url:'stun:stun.ekiga.net'},
 		{url:'stun:stun.fwdnet.net'},
@@ -68,20 +68,20 @@ function loadRtc()
 		{url:'stun:stun.voipstunt.com'},
 		{url:'stun:stun.voxgratia.org'},
 		{url:'stun:stun.xten.com'},
-		{url:'sip1.lakedestiny.cordiaip.com'},
-		{url:'stun1.voiceeclipse.net'},
-		{url:'stun.callwithus.com'},
-		{url:'stun.counterpath.net'},
-		{url:'stun.ekiga.net'},
-		{url:'stun.ideasip.com'},
-		{url:'stun.internetcalls.com'},
-		{url:'stun.noc.ams-ix.net'},
-		{url:'stun.phoneserve.com'},
-		{url:'stun.softjoys.com'},
-		{url:'stun.sipgate.net'},
-		{url:'stun.sipgate.net:10000'},
-		{url:'stun.stunprotocol.org'},
-		{url:'stun.voip.aebc.com'}]};
+		{url:'stun:sip1.lakedestiny.cordiaip.com'},
+		{url:'stun:stun1.voiceeclipse.net'},
+		{url:'stun:stun.callwithus.com'},
+		{url:'stun:stun.counterpath.net'},
+		{url:'stun:stun.ekiga.net'},
+		{url:'stun:stun.ideasip.com'},
+		{url:'stun:stun.internetcalls.com'},
+		{url:'stun:stun.noc.ams-ix.net'},
+		{url:'stun:stun.phoneserve.com'},
+		{url:'stun:stun.softjoys.com'},
+		{url:'stun:stun.sipgate.net'},
+		{url:'stun:stun.sipgate.net:10000'},
+		{url:'stun:stun.stunprotocol.org'},
+		{url:'stun:stun.voip.aebc.com'}]};
 			let onMessageReceive = e =>
 	{
 		console.log(`message received: ${e.data}`);
