@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script type="text/javascript">
+		let img = new Image();
+		let c1, ctx1, ctx2, c2;
+
+		var openFile = function(file) {
+			var input = file.target;
+
+			c1 = document.getElementById("cv");
+			ctx1 = c1.getContext("2d");
+			c2 = document.getElementById("cv2");
+
+			var reader = new FileReader();
+			reader.onload = function(){
+				var dataURL = reader.result;
+				img.src = dataURL;
+				img.onload = () => {
+					c1.width = img.width;
+					c1.height = img.height;
+					c2.width = img.width;
+					c2.height = img.height;
+					ctx1.drawImage(img, 0, 0, img.width, img.height)
+					startDrawShit();
+					document.querySelectorAll("input").forEach(v => v.remove())
+				};
+			};
+			reader.readAsDataURL(input.files[0]);
+		};
+
+		let cols = ["red","green","blue"];
+
+		let startDrawShit = function()
+		{
+			let ctx1 = c1.getContext("2d");
+			let ctx = c2.getContext("2d");
+
+			console.log(ctx.globalCompositeOperation);
+			ctx.fillStyle = "black";
+			ctx.fillRect(0, 0, c2.width, c2.height);
+
+			let makeDot = function(r)
+			{
+				let x = 20 + ~~(Math.random() * (c2.width - 40));
+				let y = 20 + ~~(Math.random() * (c2.height - 40));
+
+				let col = ~~(Math.random() * 3)
+
+				let d1 = ctx1.getImageData(x - r, y - r, r + r, r + r).data;
+				let d2 = ctx.getImageData(x - r, y - r, r + r, r + r).data;
+
+				let vt = 0, vc = 0, vm = 0; 
+				for(let i = col; i < d1.length; i += 4)
+				{
+					//Тут добавить условия круга
+					vt += d1[i];
+					vc += d2[i];
+					vm ++;
+				}
+				let v = ((vt - vc) / 255.) / vm;
+				ctx.fillStyle = cols[col];
+				ctx.fillRect(x + (1 - v) * r, y + (1 - v) * r, r * 2 * v, r * 2 * v);
+			}
+
+			let makeDot2 = function(d1, d2, s)
+			{
+				let x = ~~(Math.random() * (c2.width - s - 1));
+				let y = ~~(Math.random() * (c2.height - s - 1));
+				let w = c2.width;
+
+				let col = ~~(Math.random() * 3)
+
+				let sp = 4 * (x + c2.width * y) + col
+				let vt = 0, vc = 0, vm = s * s; 
+				for(let xx = 0; xx < s; xx++)
+				{
+					for(let yy = 0; yy < s; yy++)
+					{
+						vt += d1[4 * (x + xx + w * (y + yy)) + col];
+						vc += d2[4 * (x + xx + w * (y + yy)) + col];
+					}
+				}
+				let v = ((vt - vc) / 255.) / vm;
+				v = Math.round(v * s) 
+
+				for(let xx = 0; xx < v; xx++)
+					for(let yy = 0; yy < v; yy++)
+						d2[4 * (x + xx + w * (y + yy)) + col] = 255
+			}
+
+
+			let d1 = ctx1.getImageData(0, 0, c2.width, c2.height);
+			let d2 = ctx.getImageData(0, 0, c2.width, c2.height);
+
+			let ass = Number(document.getElementById("ass").value)
+
+			setInterval(() => {
+				let dat = d1;
+				let dd1 = d1.data, dd2 = d2.data;
+				for(let i = 0; i < 100000; i++)
+				{
+					makeDot2(dd1, dd2, ass);
+				}
+				ctx.putImageData(d2, 0, 0)
+			}, 1000)
+
+
+// 			ctx.globalCompositeOperation = "source-over";
+
+		}
+	</script>
+</head>
+<body>
+	<input id="ass" type="text" name="" value = "12">
+	<input type='file' accept='image/*' onchange='openFile(event)'><br>
+	<canvas id = "cv" style="width: 48%;"></canvas>
+	<canvas id = "cv2" style="width: 48%;"></canvas>
+</body>
+</html>
