@@ -32,6 +32,7 @@
 
 		let cols = ["red","green","blue"];
 
+
 		let startDrawShit = function()
 		{
 			let ctx1 = c1.getContext("2d");
@@ -78,8 +79,11 @@
 				{
 					for(let yy = 0; yy < s; yy++)
 					{
-						vt += d1[4 * (x + xx + w * (y + yy)) + col];
-						vc += d2[4 * (x + xx + w * (y + yy)) + col];
+						if ((Math.pow((xx/s - 0.5), 2) + Math.pow((yy/s - 0.5), 2)) < 0.25 )
+						{
+							vt += d1[4 * (x + xx + w * (y + yy)) + col];
+							vc += d2[4 * (x + xx + w * (y + yy)) + col];
+						}
 					}
 				}
 				let v = ((vt - vc) / 255.) / vm;
@@ -87,7 +91,8 @@
 
 				for(let xx = 0; xx < v; xx++)
 					for(let yy = 0; yy < v; yy++)
-						d2[4 * (x + xx + w * (y + yy)) + col] = 255
+						if ((Math.pow((xx/v - 0.5), 2) + Math.pow((yy/v - 0.5), 2)) < 0.25 )
+							d2[4 * (x + xx + w * (y + yy)) + col] = 255;
 			}
 
 
@@ -103,7 +108,7 @@
 				{
 					makeDot2(dd1, dd2, ass);
 				}
-				ctx.putImageData(d2, 0, 0)
+				ctx.putImageData(d2, 0, 0);
 			}, 1000)
 
 
