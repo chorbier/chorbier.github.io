@@ -30,6 +30,8 @@ document.addEventListener('DOMContentLoaded', e => {
 	document.getElementById('mainbutton').onclick = e => {
 		let host = document.getElementById('host').value;
 		let pass = document.getElementById('pass').value;
+		let maxlen = Number(document.getElementById('len').value);
+		maxlen = maxlen ? maxlen : 500;
 		console.log(host,pass);
 
 		console.log('start');
@@ -41,10 +43,14 @@ document.addEventListener('DOMContentLoaded', e => {
 		console.log('end');
 		let arr = sha512.digest(hash);
 		let bi = arrayToBigInt(arr);
-		let lib = characters.letters+characters.caps+characters.digits+(document.getElementById('useshit').checked ? characters.shit : "");
+		let lib = characters.letters+characters.caps+characters.digits;
+		if(document.getElementById('useshit').checked)
+		{
+			lib += characters.shit + characters.shit + characters.shit
+		}
 		let ll = BigInt(lib.length);
 		let res = []
-		while(bi > 0)
+		while(bi > 0 && res.length < maxlen)
 		{
 			res.push(lib[bi % ll]);
 			bi /= ll;
