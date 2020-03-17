@@ -106,7 +106,7 @@ function loadRtc()
 	dataChannel.onmessage = onMessageReceive;
 	pc.onicecandidate = e => 
 	{
-		if(!e)
+		if(!e.candidate)
 			return;
 		//pc.addIceCandidate(e.candidate);
 		remoteData.ice.push(e.candidate);

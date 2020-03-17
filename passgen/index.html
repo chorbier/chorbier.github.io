@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style>
+		body, html {
+			margin: 0;
+		}
+		#maindiv {
+			width: min(100%, 200px);
+    		margin: 0 auto;
+		}
+
+		#maindiv > .item {
+			width: 100%;
+			margin-bottom: 10px;
+		}
+
+		* {
+			text-align: center;
+			font-family: monospace;
+			font-size: x-large;
+		}
+
+		#maindiv > div > * {
+			width: 100%;
+		}
+
+		input {
+			border-width: 0 0 3px 0;
+			border-color: gray;
+			outline: none;
+		}
+
+		input[type=text]:focus {
+			outline-offset: 0 !important;
+			outline: solid gray 1px;
+			outline-offset: -2px;
+		}
+
+		#mainbutton {
+			width: 100%;
+			text-align: center;
+			height: 23px;
+			outline-width: 2px;
+			outline: solid gray;
+			outline-offset: -23px;
+			cursor: pointer;
+			transition: outline-offset 0.2s ease-in-out;
+		}
+
+		.line {
+			display: flex;
+		}
+
+		input[type=checkbox] {
+			align-content: initial;
+			width: 23px !important;
+   	 		height: 23px;
+		}
+
+		#mainbutton:hover {
+			outline-offset: -2px;
+		}
+
+	</style>
+	<script src="sha512.min.js"></script>
+	<script src="gen.js"></script>
+</head>
+<body>
+	<div id="maindiv">
+		<div class="item">
+			<div>hostname</div>
+			<input id="host" type="text">
+		</div>
+		<div class="item">
+			<div>password</div>
+			<input id="pass" type ="text">
+		</div>
+		<div class="item line">
+			<div>use shit</div>
+			<input id="useshit" type="checkbox">
+		</div>
+		<div id="mainbutton">
+			generate
+		</div>
+	</div>
+</body>
+</html>
