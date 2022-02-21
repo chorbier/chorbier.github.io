@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="shortcut icon" href="./shitty.ico" type="image/x-icon">
+	<title></title>
+	<style>
+		body, html {
+			margin: 0;
+		}
+		#maindiv {
+			width: min(100vw, 100vh);
+    		margin: 0 auto;
+		}
+
+		#maindiv > .item {
+			width: 100%;
+			margin-bottom: 10px;
+		}
+
+		* {
+			text-align: center;
+			font-family: monospace;
+			font-size: min(5vh, 5vw);
+		}
+
+		#maindiv > div > * {
+			width: 100%;
+		}
+
+		input[type=text], input[type=password] {
+			border-width: 0 0 3px 0;
+			border-color: gray;
+			outline: none;
+		}
+
+		input[type=text]:focus, input[type=password]:focus {
+			outline-offset: 0 !important;
+			outline: solid gray 1px;
+			outline-offset: -2px;
+		}
+
+		#mainbutton {
+			width: 100%;
+			text-align: center;
+			outline-offset: -2px;
+			outline: solid gray;
+			outline-width: 0px;
+			cursor: pointer;
+			transition: 0.2s ease-in-out;
+		}
+		
+		#mainbutton:hover {
+			outline-width: 2px;
+		}
+
+		.line > * {
+			display: inline-block;
+			width: fit-content !important;
+		}
+
+		input[type=checkbox] {
+			align-content: initial;
+			width: min(5vh, 5vw) !important;
+			height: min(5vh, 5vw);
+			vertical-align: middle;
+		}
+
+
+
+	</style>
+	<script src="sha512.min.js"></script>
+	<script src="gen.js"></script>
+</head>
+<body>
+	<div id="maindiv">
+		<div class="item">
+			<div>hostname</div>
+			<input id="host" type="text">
+		</div>
+		<div class="item">
+			<div>password</div>
+			<input id="pass" type ="password">
+		</div>
+		<div class="item">
+			<div>maxlen</div>
+			<input id="len" type ="text">
+		</div>
+		<div class="item line">
+			<div>use shit</div>
+			<input id="useshit" type="checkbox">
+		</div>
+		<div id="mainbutton">
+			generate
+		</div>
+	</div>
+</body>
+</html>

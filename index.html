@@ -12,7 +12,7 @@
 	<canvas id="Canvas" height="100%" width="100%" style="position: fixed; display:block; z-index: 1; ">:c</canvas>
 	<canvas id="Canvas2" height="100%" width="100%" style="position: fixed; display:block; z-index: 0;"></canvas>
 </div>
-<audio id="dolbit" src="http://res.cloudinary.com/chorbier/video/upload/v1534965343/Arti-Fix_-_Cybernetic_Sect_gqf8bo.mp3" autoplay=1 crossOrigin = "anonymous"></audio>
+<audio id="dolbit" src="https://res.cloudinary.com/chorbier/video/upload/v1534965343/Arti-Fix_-_Cybernetic_Sect_gqf8bo.mp3" autoplay=1 crossOrigin = "anonymous"></audio>
 <script>
 var l=document.getElementById;
 
@@ -22,7 +22,10 @@ var kek=1;
 
 var aplayer = document.getElementById('dolbit');
 
-document.addEventListener('click',() => {aplayer.play(); aplayer.volume = 0.3;});
+window.addEventListener('click',async () => {
+	await new Promise(resolve => aplayer.onload = resolve);
+	aplayer.play(); aplayer.volume = 0.3;
+});
 
 function add(xx,yy)
 {
