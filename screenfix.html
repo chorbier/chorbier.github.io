@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<style>
+		html, body {
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+	</style>
+	<script>
+		(async () => {
+			await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
+			const cv = document.getElementById('canvas');
+
+			const resize = ev => {
+				cv.width = window.innerWidth;
+				cv.height = window.innerHeight;
+			};
+			window.addEventListener('resize', resize);
+			resize();
+
+			const ctx = cv.getContext('2d');
+
+			const idt = ctx.getImageData(0, 0, 64, 64);
+			const genImages = async () => {
+				idt.data.forEach((_, k, ar) => ar[k] = k % 4 === 3 ? 255 : (Math.random() > 0.5 ? 255 : 0));
+				const ret1 = createImageBitmap(idt);
+				idt.data.forEach((v, k, ar) => ar[k] = k % 4 === 3 ? 255 : (!v * 255));
+				const ret2 = createImageBitmap(idt);
+				return [ctx.createPattern(await ret1, "repeat"), ctx.createPattern(await ret2, "repeat")];
+			}
+
+			let [p1, p2] = await genImages();
+			setInterval(async () => {
+				[p1, p2] = await genImages();
+			}, 2000)
+			while (true) {
+				[p1, p2] = [p2, p1];
+				ctx.fillStyle = p1;
+				ctx.fillRect(0, 0, cv.width, cv.height);
+				await new Promise(resolve => window.requestAnimationFrame(resolve));
+			}
+		})();
+	</script>
+</head>
+
+<body>
+	<canvas id="canvas"></canvas>
+</body>
+
+</html>
