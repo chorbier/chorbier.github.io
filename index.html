@@ -1,219 +1,229 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 </head>
+
 <body>
-<style>
-	* { margin:0; padding:0;}
-	body {background-color:#111322} 
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+		}
 
-</style>
-<div id="posos" height="100%" width="100%" style="">
-	<canvas id="Canvas" height="100%" width="100%" style="position: fixed; display:block; z-index: 1; ">:c</canvas>
-	<canvas id="Canvas2" height="100%" width="100%" style="position: fixed; display:block; z-index: 0;"></canvas>
-</div>
-<audio id="dolbit" src="https://res.cloudinary.com/chorbier/video/upload/v1534965343/Arti-Fix_-_Cybernetic_Sect_gqf8bo.mp3" autoplay=1 crossOrigin = "anonymous"></audio>
-<script>
-var l=document.getElementById;
+		body {
+			background-color: #111322
+		}
+	</style>
+	<div id="posos" height="100%" width="100%" style="">
+		<canvas id="Canvas" height="100%" width="100%" style="position: fixed; display:block; z-index: 1; ">:c</canvas>
+		<canvas id="Canvas2" height="100%" width="100%" style="position: fixed; display:block; z-index: 0;"></canvas>
+	</div>
+	<audio id="dolbit"
+		src="https://res.cloudinary.com/chorbier/video/upload/v1534965343/Arti-Fix_-_Cybernetic_Sect_gqf8bo.mp3"
+		autoplay=1 crossOrigin="anonymous"></audio>
+	<script>
+		var l = document.getElementById;
 
-var x=[],y=[],dx=[0],dy=[0],d=[0];
+		var x = [], y = [], dx = [0], dy = [0], d = [0];
 
-var kek=1;
+		var kek = 1;
 
-var aplayer = document.getElementById('dolbit');
+		var aplayer = new Promise(resolve => {
+			let pl = document.getElementById('dolbit');
+			pl.addEventListener("canplaythrough", () => {
+				resolve(pl)
+			});
+		});
 
-window.addEventListener('click',async () => {
-	await new Promise(resolve => aplayer.onload = resolve);
-	aplayer.play(); aplayer.volume = 0.3;
-});
+		window.addEventListener('click', async () => {
+			let pl = await aplayer;
+			pl.play(); pl.volume = 0.3;
+		});
 
-function add(xx,yy)
-{
-	x.push(xx);
-	y.push(yy);
-	dx.push((Math.random()-0.5)/2);
-	dy.push((Math.random()-0.5)/2);
-	d.push(Math.random()*3+0.1);
-}
-var len=200;
+		function add(xx, yy) {
+			x.push(xx);
+			y.push(yy);
+			dx.push((Math.random() - 0.5) / 2);
+			dy.push((Math.random() - 0.5) / 2);
+			d.push(Math.random() * 3 + 0.1);
+		}
+		var len = 200;
 
-var par={x:0,y:0,n:{x:0,y:0}};
-function draw()
-{
-	var c = document.getElementById("Canvas");
-	var ctx = c.getContext("2d");
-	var l=x.length;
-	ctx.clearRect(0,0,c.width,c.height);
-//	ctx.fillStyle="#444466";
-//	ctx.fillRect(0,0,c.width,c.height);
-	ctx.translate(par.x,par.y);
-	ctx.fillStyle="#9999bb";
-	for(var i=1;i<l;i++)
-	{
-		if(x[i]<-len)
-			x[i]=c.width+len;
-		else if(x[i]>(c.width+len))
-			x[i]=-len;
-		if(y[i]<-len)
-			y[i]=c.height+len;
-		else if(y[i]>(c.height+len))
-			y[i]=-len;
-	}
-	for(var i=0;i<l;i++)
-	{
-		x[i]+=dx[i]*kek;
-		y[i]+=dy[i]*kek;
-		ctx.globalAlpha=1;
-		ctx.beginPath();
-		ctx.arc(x[i],y[i],d[i],0,2*Math.PI);
-		ctx.fill();
-		for(var j=i+1;j<l;j++)
-		{
-			var dis=Math.sqrt((x[j]-x[i])*(x[j]-x[i])+(y[j]-y[i])*(y[j]-y[i]));
-			if(dis<len)
-			{
-				ctx.strokeStyle="#9999bb";
-				//ctx.globalAlpha=(len-dis)/len;
-				ctx.lineWidth=(len-dis)/len;
-				ctx.beginPath()
-				ctx.moveTo(x[i],y[i]);
-				ctx.lineTo(x[j],y[j]);
-				ctx.stroke();
+		var par = { x: 0, y: 0, n: { x: 0, y: 0 } };
+		window.draw = function() {
+			var c = document.getElementById("Canvas");
+			var ctx = c.getContext("2d");
+			var l = x.length;
+			ctx.clearRect(0, 0, c.width, c.height);
+			//	ctx.fillStyle="#444466";
+			//	ctx.fillRect(0,0,c.width,c.height);
+			ctx.translate(par.x, par.y);
+			ctx.fillStyle = "#9999bb";
+			for (var i = 1; i < l; i++) {
+				if (x[i] < -len)
+					x[i] = c.width + len;
+				else if (x[i] > (c.width + len))
+					x[i] = -len;
+				if (y[i] < -len)
+					y[i] = c.height + len;
+				else if (y[i] > (c.height + len))
+					y[i] = -len;
 			}
+			for (var i = 0; i < l; i++) {
+				x[i] += dx[i] * kek;
+				y[i] += dy[i] * kek;
+				ctx.globalAlpha = 1;
+				ctx.beginPath();
+				ctx.arc(x[i], y[i], d[i], 0, 2 * Math.PI);
+				ctx.fill();
+				for (var j = i + 1; j < l; j++) {
+					var dis = Math.sqrt((x[j] - x[i]) * (x[j] - x[i]) + (y[j] - y[i]) * (y[j] - y[i]));
+					if (dis < len) {
+						ctx.strokeStyle = "#9999bb";
+						//ctx.globalAlpha=(len-dis)/len;
+						ctx.lineWidth = (len - dis) / len;
+						ctx.beginPath()
+						ctx.moveTo(x[i], y[i]);
+						ctx.lineTo(x[j], y[j]);
+						ctx.stroke();
+					}
+				}
+			}
+			ctx.translate(-par.x, -par.y);
 		}
-	}
-	ctx.translate(-par.x,-par.y);
-}
-var height;
-var width;
-function resize()
-{
-	var ss=document.getElementById("Canvas2");
-	var c = document.getElementById("Canvas");
-	c.width=window.innerWidth;
-	c.height=window.innerHeight;
-	ss.width=window.innerWidth;
-	ss.height=window.innerHeight;
-	height=c.height;
-	width=c.width;
-}
-resize();
-window.addEventListener('resize',resize,false);
-
-for(var i=0;i<220;i++)
-{
-	add(Math.random()*(width+2*len)-len,Math.random()*(height+2*len)-len);
-}
-
-window.onmousemove=function(e)
-{
-	x[0] = e.offsetX;
-	y[0] = e.offsetY;
-
-	par.n.x=(x[0]-width/2)/30;
-	par.n.y=(y[0]-height/2)/30;
-
-	par.x+=(par.n.x-par.x)*0.01;
-	par.y+=(par.n.y-par.y)*0.01;
-
-	x[0]-=par.x;
-	y[0]-=par.y;
-}
-
-window.onclick=function(e)
-{
-	var cnt=4+(Math.random()>0.5);
-	for(var i=1;i<cnt;i++)
-		add(x[0],y[0]);
-}/**/
-
-setInterval(function(){draw(); draw2();},20);
-</script>
-
-<script>
-var sos=document.getElementsByClassName("sos");
-
-
-var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-var analyser = audioCtx.createAnalyser();
-
-var stream=document.getElementById("dolbit");
-stream.volume = 1;
-
-stream.crossOrigin = "anonymous";
-
-var draw2=function (){};
-
-stream.oncanplaythrough=function()
-{
-	source = audioCtx.createMediaElementSource(stream);
-	source.connect(analyser);
-	analyser.connect(audioCtx.destination);
-
-	analyser.fftSize = 512;
-	var bufferLength = analyser.frequencyBinCount;
-	console.log(bufferLength);
-	var dataArray = new Uint8Array(bufferLength);
-
-	var asd=0;
-	var kv=0;
-
-	draw2 = function ()
-	{
-		var c = document.getElementById("Canvas");
-		var ctx = c.getContext("2d");
-
-		analyser.getByteFrequencyData(dataArray);
-
-		nv=0;
-		for(var i=0;i<bufferLength; i++)
-		{
-			nv+=(dataArray[i])*(dataArray[i]);
+		var height;
+		var width;
+		function resize() {
+			var ss = document.getElementById("Canvas2");
+			var c = document.getElementById("Canvas");
+			c.width = window.innerWidth;
+			c.height = window.innerHeight;
+			ss.width = window.innerWidth;
+			ss.height = window.innerHeight;
+			height = c.height;
+			width = c.width;
 		}
-		nv=Math.sqrt(nv);
+		resize();
+		window.addEventListener('resize', resize, false);
 
-		var ses=clamp(nv-kv,0,Infinity)*(nv/2000);
-
-		asd=(asd+ses*0.8)%360;
-
-	//	document.body.style.backgroundColor = "hsl("+Math.round(asd)+",100%, "+clamp(Math.round(ses/5+5),10,100) +"%)";
-		document.body.style.backgroundColor = `hsl(${Math.round(240+ses/2)}, 100%, ${clamp(Math.round(ses/10+10),10,20)}%)`;// "hsl("+Math.round(240+ses/2)+",100%, "+clamp(Math.round(ses/2+10),10,40) +"%)";
-
-		kv=nv;
-
-		kek=clamp(ses/2,0,50)+1;
-
-		var c = document.getElementById("Canvas2");
-		var ctx = c.getContext("2d");
-
-		ctx.globalAlpha=0.5;
-
-		ctx.clearRect(0,0,c.width,c.height);
-		var bl=bufferLength*0.6;
-		var blw=(c.width/2)/bl;
-		for(var i=0;i<bl; i++)
-		{
-			var s=dataArray[i]/512.0*(c.height);
-			ctx.fillStyle="hsl("+Math.round(240+i/2+dataArray[i]/10)+",100%, "+clamp(Math.round(dataArray[i]/10+30),30,60) +"%)";
-			ctx.fillRect(0+blw*(i),c.height/2-s,blw-1,s*2);
-			ctx.fillRect(c.width-blw*(i+0.2),c.height/2-s,blw-1,s*2);
-			//ctx.fillRect(0,c.height/2+blw*(i),dataArray[i]*4.0,blw-1);
+		for (var i = 0; i < 220; i++) {
+			add(Math.random() * (width + 2 * len) - len, Math.random() * (height + 2 * len) - len);
 		}
-		ctx.globalAlpha=1;
 
-	}	
-}
+		window.onmousemove = function (e) {
+			x[0] = e.offsetX;
+			y[0] = e.offsetY;
+
+			par.n.x = (x[0] - width / 2) / 30;
+			par.n.y = (y[0] - height / 2) / 30;
+
+			par.x += (par.n.x - par.x) * 0.01;
+			par.y += (par.n.y - par.y) * 0.01;
+
+			x[0] -= par.x;
+			y[0] -= par.y;
+		}
+
+		window.onclick = function (e) {
+			var cnt = 4 + (Math.random() > 0.5);
+			for (var i = 1; i < cnt; i++)
+				add(x[0], y[0]);
+		}/**/
+
+		window.draw2 = null;
+
+		const renderFrame = () => {
+			requestAnimationFrame(renderFrame);
+			if(draw) {
+				draw()
+			}
+			if(draw2) {
+				draw2()
+			}
+		};
+		requestAnimationFrame(renderFrame);
+	</script>
+
+	<script>
+		var sos = document.getElementsByClassName("sos");
+
+		window.addEventListener('click', () => {
+			var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+			var analyser = audioCtx.createAnalyser();
+
+			var stream = document.getElementById("dolbit");
+			stream.volume = 1;
+
+			stream.crossOrigin = "anonymous";
+
+			stream.oncanplaythrough = function () {
+				source = audioCtx.createMediaElementSource(stream);
+				source.connect(analyser);
+				analyser.connect(audioCtx.destination);
+
+				analyser.fftSize = 512;
+				var bufferLength = analyser.frequencyBinCount;
+				console.log(bufferLength);
+				var dataArray = new Uint8Array(bufferLength);
+
+				var asd = 0;
+				var kv = 0;
+
+				window.draw2 = function () {
+					var c = document.getElementById("Canvas");
+					var ctx = c.getContext("2d");
+
+					analyser.getByteFrequencyData(dataArray);
+
+					nv = 0;
+					for (var i = 0; i < bufferLength; i++) {
+						nv += (dataArray[i]) * (dataArray[i]);
+					}
+					nv = Math.sqrt(nv);
+
+					var ses = clamp(nv - kv, 0, Infinity) * (nv / 2000);
+
+					asd = (asd + ses * 0.8) % 360;
+
+					//	document.body.style.backgroundColor = "hsl("+Math.round(asd)+",100%, "+clamp(Math.round(ses/5+5),10,100) +"%)";
+					document.body.style.backgroundColor = `hsl(${Math.round(240 + ses / 2)}, 100%, ${clamp(Math.round(ses / 10 + 10), 10, 20)}%)`;// "hsl("+Math.round(240+ses/2)+",100%, "+clamp(Math.round(ses/2+10),10,40) +"%)";
+
+					kv = nv;
+
+					kek = clamp(ses / 2, 0, 50) + 1;
+
+					var c = document.getElementById("Canvas2");
+					var ctx = c.getContext("2d");
+
+					ctx.globalAlpha = 0.5;
+
+					ctx.clearRect(0, 0, c.width, c.height);
+					var bl = bufferLength * 0.6;
+					var blw = (c.width / 2) / bl;
+					for (var i = 0; i < bl; i++) {
+						var s = dataArray[i] / 512.0 * (c.height);
+						ctx.fillStyle = "hsl(" + Math.round(240 + i / 2 + dataArray[i] / 10) + ",100%, " + clamp(Math.round(dataArray[i] / 10 + 30), 30, 60) + "%)";
+						ctx.fillRect(0 + blw * (i), c.height / 2 - s, blw - 1, s * 2);
+						ctx.fillRect(c.width - blw * (i + 0.2), c.height / 2 - s, blw - 1, s * 2);
+						//ctx.fillRect(0,c.height/2+blw*(i),dataArray[i]*4.0,blw-1);
+					}
+					ctx.globalAlpha = 1;
+
+				}
+			}
+
+		})
 
 
 
-function clamp(a,b,c)
-{
-	return (a<b)?b:((a>c)?c:a);
-}
+		function clamp(a, b, c) {
+			return (a < b) ? b : ((a > c) ? c : a);
+		}
 
 
-</script>
-<div class="sos" id="keks"></div>
+	</script>
+	<div class="sos" id="keks"></div>
 </body>
-</html>
 
+</html>
